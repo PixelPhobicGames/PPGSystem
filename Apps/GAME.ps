@@ -1,0 +1,40 @@
+wipe
+
+var SCAL 4
+var SIZE 8
+spr PLYR '0100001000100100011111100101101011111111111111111100001100111100'
+var PLYX 0 
+var PLYY 120
+
+var INPT 0
+
+
+:LOOP
+
+    drawspr PLYR PLYX PLYY SCAL SIZE
+
+    pullinp INPT
+
+    wipe 
+    cmpvi INPT 2
+        jife RIGT
+
+
+    wipe 
+    cmpvi INPT 4
+        jife LEFT
+
+
+
+jumpl LOOP
+
+
+:RIGT
+    add PLYX 1
+ret
+
+
+:LEFT
+    sub PLYX 1
+ret
+

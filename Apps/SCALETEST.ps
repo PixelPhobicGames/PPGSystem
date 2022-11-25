@@ -1,0 +1,50 @@
+wipe 
+
+spr SPR1 '2200002202000020022222202212212202222220002122000020020002200220'
+
+
+var POSX 70
+var POSY 50
+var SCAL 2
+var SIZE 8
+
+var DIRC 0
+
+:LOOP
+
+drawspr SPR1 POSX POSY SCAL SIZE
+
+cmpvi SCAL 10
+jife SHRK
+wipe 
+
+cmpvi SCAL 0
+jife GROW
+wipe 
+
+cmpvi DIRC 1
+jife GRO1
+
+cmpvi DIRC 0
+jife SHR1
+
+jumpl LOOP
+
+
+
+:GROW
+set DIRC 1
+ret
+
+
+:GRO1
+add SCAL 1
+ret
+
+:SHRK
+set DIRC 0
+ret
+
+:SHR1
+sub SCAL 1
+ret
