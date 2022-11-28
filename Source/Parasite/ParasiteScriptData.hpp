@@ -9,13 +9,32 @@
 
 using namespace std;
 
-#define MaxVaribles 1000 // Can Change these
+#define MaxVaribles 16384 // Can Change these
 
-#define MaxJumpPoints 100 //
+#define MaxJumpPoints 16384 //
 
 static int VaribleCounter = 0;
 
 static int JumpPointCounter = 0;
+
+static int ProcessSpeed = 1;
+
+
+
+
+
+
+Color PDBlue = {22, 114, 136 , 255};
+Color PLBlue = {140, 218, 236 , 255};
+Color PDRed = {180, 82, 72, 255};
+Color PLRed = {212, 140, 132 , 255};
+Color PDYellow = {168, 154, 73, 255};
+Color PLYellow = {214, 207, 162 , 255};
+Color PDGreen = {60, 180, 100, 255};
+Color PLGreen = {155, 221, 177 , 255};
+Color PDPurple = {100, 60, 106, 255};
+Color PLPurple = {131, 99, 148 , 255};
+
 
 typedef struct Memory{
     string Name;
@@ -39,7 +58,7 @@ static JumpPoint JumpPoints[MaxJumpPoints];
 typedef struct ParasiteScriptData{
    istringstream ProgramData;
    
-   string Line[10000];
+   string Line[32768]; // 32kb
    
    int LineCounter;
    int ProgramSize;

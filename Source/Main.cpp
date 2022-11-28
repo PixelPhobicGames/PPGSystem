@@ -9,6 +9,8 @@ int main(int argc, char *argv[])
     InitWindow(320 , 240, "PPGSystem");
     SetTargetFPS(30);
 
+    InitAudioDevice();
+
 
     if (argc == 1){
         PPGSystem.LoadData();
@@ -24,10 +26,12 @@ int main(int argc, char *argv[])
         BeginDrawing();
         ClearBackground(BLACK);
 
-        ParasiteScriptInterperate();
+        for (int i = 0 ; i <= ProcessSpeed ; i ++)ParasiteScriptInterperate();
 
         EndDrawing();
     }
+
+    cout << "\033[0;37m";
 
     CloseWindow();
 }

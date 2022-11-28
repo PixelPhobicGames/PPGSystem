@@ -11,11 +11,11 @@
   ifeq ($(PLATFORM),windows)
     CC = C:\raylib\mingw\bin\g++.exe
     exename ?= PPGSystem.exe
-    CFLAGS  = -static -Os -static -Wall -Iexternal -DPLATFORM_DESKTOP -lopengl32 -lraylib -lgdi32 -lwinmm 
+    CFLAGS  = -static -Wall -Iexternal -DPLATFORM_DESKTOP -lopengl32 -lraylib -lgdi32 -lwinmm 
   endif
   ifeq ($(PLATFORM),linux)
     CC = g++
-    exename ?= ParasiteRunner
+    exename ?= PPGSystem
     CFLAGS  = -Os -Wall -Wno-missing-braces -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
   endif
 

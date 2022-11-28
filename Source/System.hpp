@@ -11,10 +11,15 @@ class System{
 
     public:
         Font SystemFont;
-        wstring TerminalData = L" |    PPG SYSTEM V.1.0 |.......................|";
+        Sound TypingNoise;
+        wstring TerminalData = L"";
+        wstring TerminalStartText = L" |    PPG SYSTEM V.1.0 |.......................|"; 
 
         void LoadData(){
             SystemFont = LoadFont("System/Font/Font.ttf");
+            TypingNoise = LoadSound("System/Noises/TypingNoise.mp3");
+            Image Icon = LoadImage("System/Icon/Icon.png");
+            SetWindowIcon(Icon);
         }
 };
 
@@ -23,9 +28,12 @@ static System PPGSystem;
 
 static bool TerminalRunning = true;
 static bool SpriteEditorRunning = false;
+static bool TextEditorRunning = false;
+static const char* FileName; 
 
 static wchar_t EditorColor = L'2';
-static wstring EditorSprite = L"0000000000000000000000000000000000000000000000000000000000000000";
+static wstring EditorSprite = L"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++";
+
 
 void DisplayTerminal(){
 
@@ -225,6 +233,10 @@ void DisplayTerminal(){
 
     if (IsKeyPressed(KEY_BACKSPACE))PPGSystem.TerminalData.erase(PPGSystem.TerminalData.size() - 1);
 
+    if (GetKeyPressed() != NULL){
+        PlaySoundMulti(PPGSystem.TypingNoise);
+    }
+
     bool RunCommand = false;
 
     for (int i = 0 ; i <= PPGSystem.TerminalData.size(); i++){
@@ -234,6 +246,25 @@ void DisplayTerminal(){
         }
 
         if (RunCommand){
+            if (PPGSystem.TerminalData[i] == 'E' && PPGSystem.TerminalData[i+1] == 'D' && PPGSystem.TerminalData[i+2] == 'I'){
+                PPGSystem.TerminalData = L"\0";
+
+                wstring AppName = L"";
+
+                for (int x = i + 5 ; x <= 100; x ++){
+                    if (PPGSystem.TerminalData[x] == L'|'){
+                        break;
+                    }
+                    AppName += PPGSystem.TerminalData[x];
+                }
+
+                TextEditorRunning = true;
+                TerminalRunning = false; // Launch Into App
+
+                FileName = FormatText("Apps/%ls.ps" ,AppName.c_str());
+                break;
+            }
+            
             if (PPGSystem.TerminalData[i] == 'C' && PPGSystem.TerminalData[i+1] == 'L' && PPGSystem.TerminalData[i+2] == 'S'){
                 PPGSystem.TerminalData = L"\0";
             }
@@ -268,81 +299,146 @@ void DisplayTerminal(){
 
 }
 
+static int SpriteEditorSize = 7;
+static int SpriteEditorWidth = 16;
+
+static bool SpriteEditorLines = true;
+static bool Booting = true;
+
+static int TextCounter = 0;
+
+void BootScreen(){
+    if (Booting){
+
+        PPGSystem.TerminalData += PPGSystem.TerminalStartText[TextCounter];
+        if (TextCounter != 47)TextCounter ++;
+        else {
+            Booting = false;
+        }
+    }
+}
+
 void StartMenu(){
     while (TerminalRunning)
     {
         BeginDrawing();
         ClearBackground(BLACK);
 
-        if (!SpriteEditorRunning){
+        if (TextEditorRunning){
             DisplayTerminal();
         }
+
+        if (!SpriteEditorRunning){
+            DisplayTerminal();
+            BootScreen();
+        }
         else {
-            for (int x = 0 ; x <= 7 ; x ++){
-                for (int y = 0 ; y <= 7 ; y ++){
-                    switch (EditorSprite[y * 8 + x])
+            for (int x = 0 ; x <= SpriteEditorSize ; x ++){
+                for (int y = 0 ; y <= SpriteEditorSize ; y ++){
+                    switch (EditorSprite[y * (SpriteEditorSize + 1) + x])
                     {
                         case L'0':
-                            DrawRectangle((x * 16 ) + 20, (y * 16 ) + 20, 16 , 16 , BLACK);
+                            DrawRectangle((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , PDBlue);
                             break;
                         case L'1':
-                            DrawRectangle((x * 16 ) + 20, (y * 16 ) + 20, 16 , 16 , WHITE);
+                            DrawRectangle((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , PLBlue);
                             break;
                         case L'2':
-                            DrawRectangle((x * 16 ) + 20, (y * 16 ) + 20, 16 , 16 , RED);
+                            DrawRectangle((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , PDRed);
                             break;
                         case L'3':
-                            DrawRectangle((x * 16 ) + 20, (y * 16 ) + 20, 16 , 16 , GREEN);
+                            DrawRectangle((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , PLRed);
                             break;
                         case L'4':
-                            DrawRectangle((x * 16 ) + 20, (y * 16 ) + 20, 16 , 16 , BLUE);
+                            DrawRectangle((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , PDYellow);
                             break;
                         case L'5':
-                            DrawRectangle((x * 16 ) + 20, (y * 16 ) + 20, 16 , 16 , YELLOW);
+                            DrawRectangle((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , PLYellow);
                             break;
                         case L'6':
-                            DrawRectangle((x * 16 ) + 20, (y * 16 ) + 20, 16 , 16 , PURPLE);
+                            DrawRectangle((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , PDPurple);
                             break;
                         case L'7':
-                            DrawRectangle((x * 16 ) + 20, (y * 16 ) + 20, 16 , 16 , PINK);
+                            DrawRectangle((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , PLPurple);
                             break;
                         case L'8':
-                            DrawRectangle((x * 16 ) + 20, (y * 16 ) + 20, 16 , 16 , BROWN);
+                            DrawRectangle((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , PDGreen);
                             break;
                         case L'9':
-                            DrawRectangle((x * 16 ) + 20, (y * 16 ) + 20, 16 , 16 , GRAY);
+                            DrawRectangle((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , PLGreen);
                             break;
 
                         default:
+                            if (SpriteEditorLines)DrawRectangle((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , PINK);
                             break;
                     }
 
-                    DrawRectangleLines((x * 16 ) + 20, (y * 16 ) + 20, 16 , 16 , WHITE);
+                    if (SpriteEditorLines)DrawRectangleLines((x *  SpriteEditorWidth  ) + 15, (y *  SpriteEditorWidth  ) + 15, SpriteEditorWidth ,  SpriteEditorWidth , WHITE);
+
+                    DrawRectangleLines( 15, 15, (SpriteEditorWidth * SpriteEditorSize + SpriteEditorWidth) ,  (SpriteEditorWidth * SpriteEditorSize + SpriteEditorWidth)  , WHITE);
                 }
             }
 
             if (IsMouseButtonDown(0)){
-                EditorSprite[(((GetMouseY() - 20) / 16 )) * 8 + (((GetMouseX() - 20) / 16))] = EditorColor;
-
-                if (IsKeyPressed(KEY_ONE))EditorColor = L'1';
-                if (IsKeyPressed(KEY_TWO))EditorColor = L'2';
-                if (IsKeyPressed(KEY_THREE))EditorColor = L'3';
-                if (IsKeyPressed(KEY_FOUR))EditorColor = L'4';
-                if (IsKeyPressed(KEY_FIVE))EditorColor = L'5';
-                if (IsKeyPressed(KEY_SIX))EditorColor = L'6';
-                if (IsKeyPressed(KEY_SEVEN))EditorColor = L'7';
-                if (IsKeyPressed(KEY_EIGHT))EditorColor = L'8';
-                if (IsKeyPressed(KEY_NINE))EditorColor = L'9';
-                if (IsKeyPressed(KEY_ZERO))EditorColor = L'0';
-                if (IsKeyPressed(KEY_ENTER))wcout << EditorSprite << "\n";
+                EditorSprite[(((GetMouseY() - 15) /  SpriteEditorWidth )) * (SpriteEditorSize + 1) + (((GetMouseX() - 15) /  SpriteEditorWidth))] = EditorColor;
             }
 
-            DrawTextEx(PPGSystem.SystemFont , FormatText("%ls" ,EditorSprite.c_str()) , { 0 , 200 } , 8 , 1 , WHITE );
+            if (IsKeyPressed(KEY_ONE))EditorColor = L'1';
+            if (IsKeyPressed(KEY_TWO))EditorColor = L'2';
+            if (IsKeyPressed(KEY_THREE))EditorColor = L'3';
+            if (IsKeyPressed(KEY_FOUR))EditorColor = L'4';
+            if (IsKeyPressed(KEY_FIVE))EditorColor = L'5';
+            if (IsKeyPressed(KEY_SIX))EditorColor = L'6';
+            if (IsKeyPressed(KEY_SEVEN))EditorColor = L'7';
+            if (IsKeyPressed(KEY_EIGHT))EditorColor = L'8';
+            if (IsKeyPressed(KEY_NINE))EditorColor = L'9';
+            if (IsKeyPressed(KEY_ZERO))EditorColor = L'0';
+            if (IsKeyPressed(KEY_MINUS))EditorColor = L'+';
+            if (IsKeyPressed(KEY_ENTER))wcout << EditorSprite << "\n";
+
+            if (IsKeyPressed(KEY_A)){
+                SpriteEditorSize --;
+
+                EditorSprite = L"\0";
+
+                for (int i = 0 ; i <= ((SpriteEditorSize + 1 ) * (SpriteEditorSize + 1)); i ++){
+                    EditorSprite += L'+';
+                }
+            }
+
+            if (IsKeyPressed(KEY_S)){
+                SpriteEditorSize ++;
+
+                EditorSprite = L"\0";
+
+                for (int i = 0 ; i <= ((SpriteEditorSize + 1) * (SpriteEditorSize + 1) - 1); i ++){
+                    EditorSprite += L'+';
+                }
+            }
+
+            if (IsKeyPressed(KEY_Z)){
+                SpriteEditorWidth --;
+            }
+
+            if (IsKeyPressed(KEY_X)){
+                SpriteEditorWidth ++;
+            }
+            if (IsKeyPressed(KEY_D)){
+                if (SpriteEditorLines){
+                    SpriteEditorLines = false;
+                }
+                else {
+                    SpriteEditorLines = true;
+                }
+            }
+
+            DrawRectangle(198 , 18 , 24 *  3.75, 10 , BLACK);
+            DrawTextEx(PPGSystem.SystemFont , FormatText("Sprite Size: %i" ,SpriteEditorSize + 1) , { 200 , 20 } , 8 , 1 , WHITE );
 
             
         }
 
-        if (IsKeyPressed(KEY_ESCAPE)){
+        if (IsKeyDown(KEY_ESCAPE)){
             TerminalRunning = false;
         }
 
