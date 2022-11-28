@@ -1,50 +1,59 @@
-wipe 
+spr Sprite '+++++00+++++++++++++0770++00+++++000076600770+++07706066667660++06666666606660++066600666666660++06676000066660++07666666666660+067776666607666006777666666006600666776666666660+966776666666660++9966669966669+++++9999++9999+++++++++++++++++++++++++++++++++++'
 
-spr SPR1 '2200002202000020022222202212212202222220002122000020020002200220'
+var SpriteX 128
+var SpriteY 50
+var SpriteScale 4
+var SpriteSize 16
 
-
-var POSX 70
-var POSY 50
-var SCAL 2
-var SIZE 8
-
-var DIRC 0
-
-:LOOP
-
-drawspr SPR1 POSX POSY SCAL SIZE
-
-cmpvi SCAL 10
-jife SHRK
-wipe 
-
-cmpvi SCAL 0
-jife GROW
-wipe 
-
-cmpvi DIRC 1
-jife GRO1
-
-cmpvi DIRC 0
-jife SHR1
-
-jumpl LOOP
+var Input 0
 
 
+var Temp 0
+var Temp2 160
 
-:GROW
-set DIRC 1
+:Main
+
+drawspr Sprite SpriteX SpriteY SpriteScale SpriteSize  
+
+pullinp Input
+
+cmpvi Input 1
+    jife KeyUp
+
+cmpvi Input 3
+    jife KeyDown
+
+tick 
+
+jumpl Main
+
+:KeyUp
+    add SpriteScale 1
+    jumpl Scale
+
+ret
+
+:KeyDown
+    sub SpriteScale 1
+    jumpl Scale
 ret
 
 
-:GRO1
-add SCAL 1
-ret
+:Scale
+    set Temp 0
+    set Temp2 160
+    setv Temp SpriteScale
+    mulv Temp SpriteSize
 
-:SHRK
-set DIRC 0
-ret
+    // 64 
 
-:SHR1
-sub SCAL 1
-ret
+    div Temp 2
+
+    // 32
+
+
+    sub Temp2 160
+
+    setv SpriteX Temp2
+
+jumpl Main

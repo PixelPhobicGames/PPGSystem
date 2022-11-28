@@ -275,18 +275,17 @@ auto ParasiteScriptInterperate(){ // Quick Interperater
                 if (SplitValue(ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] , 0 ) == "subv"){   
                     int Value1 = 0;
                     int Value2 = 0;
+
                     for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] , 1 )){
-                            Value1 = VaribleMemory[i].IValue;
-                        }
                         if (VaribleMemory[i].Name == SplitValue(ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] , 2 )){
                             Value2 = VaribleMemory[i].IValue;
                         }
                     }
 
+
                     for (int i = 0 ; i <= VaribleCounter; i++){
                         if (VaribleMemory[i].Name == SplitValue(ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] , 1 )){
-                            VaribleMemory[i].IValue = Value1 - Value2;
+                            VaribleMemory[i].IValue = VaribleMemory[i].IValue - Value2;
                             cout << BlueText << "subv Result:"<< VaribleMemory[i].IValue << "\n";
                         }
                     }
@@ -362,7 +361,7 @@ auto ParasiteScriptInterperate(){ // Quick Interperater
                 if (SplitValue(ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] , 0 ) == "div"){   
                     for (int i = 0 ; i <= VaribleCounter; i++){
                         if (VaribleMemory[i].Name == SplitValue(ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] , 1 )){
-                            VaribleMemory[i].IValue = VaribleMemory[i].IValue * StringToInt(SplitValue(ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] , 2 ));
+                            VaribleMemory[i].IValue = VaribleMemory[i].IValue / StringToInt(SplitValue(ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] , 2 ));
                             cout << BlueText << "div Result:"<< VaribleMemory[i].IValue << "\n";
                         }
                     }
@@ -424,6 +423,8 @@ auto ParasiteScriptInterperate(){ // Quick Interperater
                         if (VaribleMemory[i].Name == SplitValue(ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] , 1 )){
                             VaribleMemory[i].IValue = InValue;   
                             VaribleMemory[i].Value = InStringValue;   
+
+                            cout << RedText << "setv: " << InValue << " \n" ;
                         }
                     }
                 }
