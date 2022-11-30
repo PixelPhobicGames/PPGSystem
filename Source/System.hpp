@@ -304,16 +304,33 @@ static int SpriteEditorWidth = 16;
 
 static bool SpriteEditorLines = true;
 static bool Booting = true;
-
+static int BootDelay = 90;
 static int TextCounter = 0;
 
 void BootScreen(){
-    if (Booting){
+    wstring BootScreenText = L"BOOTING PPGSYSTEM..";
 
-        PPGSystem.TerminalData += PPGSystem.TerminalStartText[TextCounter];
-        if (TextCounter != 47)TextCounter ++;
-        else {
-            Booting = false;
+    if (BootDelay != 0){
+        PPGSystem.TerminalData += BootScreenText[TextCounter];
+        if (TextCounter != 18)TextCounter ++;
+
+        BootDelay --;
+
+
+        if (BootDelay == 1){
+            TextCounter = 0;
+            PPGSystem.TerminalData = L'\0';
+            BootDelay --;
+        }
+        
+    }
+    else {
+        if (Booting){
+            PPGSystem.TerminalData += PPGSystem.TerminalStartText[TextCounter];
+            if (TextCounter != 47)TextCounter ++;
+            else {
+                Booting = false;
+            }
         }
     }
 }
