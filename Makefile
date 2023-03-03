@@ -16,7 +16,7 @@
   ifeq ($(PLATFORM),linux)
     CC = g++
     exename ?= PPGSystem
-    CFLAGS  = -Os -Wall -Wno-missing-braces -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
+    CFLAGS  = -Wall -Wno-missing-braces -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
   endif
 
   all: $(TARGET)
