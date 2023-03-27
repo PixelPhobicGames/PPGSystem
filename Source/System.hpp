@@ -198,7 +198,7 @@ void DisplayTerminal(){
                 break;
         }
  
-        DrawTextEx(PPGSystem.SystemFont, FormatText("%c", DisplayCharacter), {CharacterPlace * 14 , 12 * CharacterLine}, 15, 1, WHITE);
+        DrawTextEx(PPGSystem.SystemFont, TextFormat("%c", DisplayCharacter), {CharacterPlace * 14 , 12 * CharacterLine}, 15, 1, WHITE);
         CharacterPlace ++;
         
     }
@@ -261,7 +261,7 @@ void DisplayTerminal(){
                 TextEditorRunning = true;
                 TerminalRunning = false; // Launch Into App
 
-                FileName = FormatText("Apps/%ls.ps" ,AppName.c_str());
+                FileName = TextFormat("Apps/%ls.ps" ,AppName.c_str());
                 break;
             }
             
@@ -286,9 +286,9 @@ void DisplayTerminal(){
                     AppName += PPGSystem.TerminalData[x];
                 }
 
-                cout << FormatText("Apps/%ls.ps" ,AppName.c_str());
+                cout << TextFormat("Apps/%ls.ps" ,AppName.c_str());
             
-                LoadScript(FormatText("Apps/%ls.ps" ,AppName.c_str()));
+                LoadScript(TextFormat("Apps/%ls.ps" ,AppName.c_str()));
                 TerminalRunning = false; // Launch Into App
                 break;
             }
@@ -450,7 +450,7 @@ void StartMenu(){
             }
 
             DrawRectangle(198 , 18 , 24 *  3.75, 10 , BLACK);
-            DrawTextEx(PPGSystem.SystemFont , FormatText("Sprite Size: %i" ,SpriteEditorSize + 1) , { 200 , 20 } , 8 , 1 , WHITE );
+            DrawTextEx(PPGSystem.SystemFont , TextFormat("Sprite Size: %i" ,SpriteEditorSize + 1) , { 200 , 20 } , 8 , 1 , WHITE );
 
             
         }

@@ -204,15 +204,14 @@ static bool TickFlag = false;
 static int CycleCounter = 0;
 static int TimeCounter = 0;
 
-void* CycleInstruction(void* VInstruction){
-    string Instruction = *static_cast<string*>(VInstruction);
+static int InstructionsPerTick = 8;
 
+auto CycleInstruction(){
     if (ParasiteScriptCoreData.LineCounter != ParasiteScriptCoreData.ProgramSize){
+        string Instruction = ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter];
+
         if (SplitValue(Instruction, 0 ) == "stop"){
-            
-        }
-        if (SplitValue(Instruction , 0 ) == "tick"){
-            TickFlag = true;
+            exit(0);
         }
 
         if (SplitValue(Instruction, 0 ) == "var" || SplitValue(Instruction, 0 ) == "spr"){
@@ -441,10 +440,6 @@ void* CycleInstruction(void* VInstruction){
                         cout << RedText << "setv: " << InValue << " \n" ;
                     }
                 }
-            }
-            
-            if (SplitValue(Instruction, 0 ) == "end"){   
-                exit(0);
             }
 
             if (SplitValue(Instruction, 0 ) == "settextsize"){   
@@ -697,47 +692,10 @@ void* CycleInstruction(void* VInstruction){
                         }
                     }
                 }
-            }
         }
+    }
 
     if (BenchMode){
         CycleCounter ++;
     }
-}
-
-static int InstructionsPerTick = 2;
-
-
-auto ParasiteScriptInterperate(){ // Quick Interperater
-    #if (defined(SingleCore))
-    for (int i = 0 ; i <= ParasiteScriptCoreData.ProgramSize ; i ++){
-        if (ParasiteScriptCoreData.LineCounter != ParasiteScriptCoreData.ProgramSize){
-
-            CycleInstruction(&ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter]);
-            ParasiteScriptCoreData.LineCounter ++;
-
-            if (TickFlag){
-                TickFlag = false;
-                i = ParasiteScriptCoreData.ProgramSize;
-            }
-
-        }
-    }
-    #endif
-    #if (defined(MultiCore))
-    if (ParasiteScriptCoreData.LineCounter != ParasiteScriptCoreData.ProgramSize){
-        
-        for (int i = 0; i <= InstructionsPerTick; i++){
-            pthread_t ChildThread;
-            pthread_create( &ChildThread, NULL, &CycleInstruction, &ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter + i]);
-        }
-        
-        ParasiteScriptCoreData.LineCounter += InstructionsPerTick;
-
-        if (TickFlag){
-            TickFlag = false;
-        }
-    }
-    #endif
-
 }

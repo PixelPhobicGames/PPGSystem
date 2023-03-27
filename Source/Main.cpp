@@ -19,11 +19,7 @@ int main(int argc, char *argv[])
     }
     else {
         LoadScript(argv[1]);
- 
-
         BenchMode = true;
-        
-        
 
     }
 
@@ -32,16 +28,10 @@ int main(int argc, char *argv[])
         BeginDrawing();
         ClearBackground(BLACK);
 
-        if (BenchMode){
-            TimeCounter ++;
-
-            if (TimeCounter == 30 * 5){
-                cout << "Average Speed: " << (CycleCounter / TimeCounter) / 30 << " \n";
-                cout << "Cycle Score: " << (CycleCounter) / 30 * 5 << " \n";
-                exit(0);
-            }
+        for (int T = 0 ; T <= InstructionsPerTick ; T++){
+            CycleInstruction();
+            ParasiteScriptCoreData.LineCounter += 1;
         }
-        for (int i = 0 ; i <= ProcessSpeed ; i ++)ParasiteScriptInterperate();
 
         EndDrawing();
     }
