@@ -203,6 +203,12 @@ ___
 * You Can Open .ps Files with the PPGSystem.exe App and It Will Start an App Automatically.
 		 
 ---
+**Etc Info**
+___
+ - F1 To Decrease Window Scale
+ - F2 To Increase Window Scale
+ - Running Program With a -D Flag Will Turn on Debug Mode
+ - Running Program With a -Ds Flag Will Show Instructions Per Second at the Bottom
 
 Thank You :)
 
