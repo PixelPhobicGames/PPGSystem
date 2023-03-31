@@ -1,5 +1,5 @@
-﻿
-**PPG System v.1.1.0 *- Release Notes***
+
+**PPG System v.1.0.0 *- Release Notes***
 ----
 Description 
 
@@ -151,6 +151,10 @@ Limitations of PPG System / Specifications
 		  arrload MyArray 1 ArrayData  # ArrayData = MyArray[1]
 		  arrload MyArray Index ArrayData  # ArrayData = MyArray[0] or MyArray[Index}
 		  arrwipe MyArray 0
+	   
+	   clear  # Clears Screen
+	   delay []  # Delays Number of Frames
+	   pspeed []  # Sets Speed of PPGSystem Processor , or Instructions Per Frame 
 		  
 		  
 		  
@@ -204,6 +208,10 @@ Thank You :)
 
 		 
 	 
+		  
+
+	 
+
 		  
 
 	 
