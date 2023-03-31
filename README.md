@@ -1,4 +1,5 @@
-**PPG System v.1.0.0 *- Release Notes***
+﻿
+**PPG System v.1.1.0 *- Release Notes***
 ----
 Description 
 
@@ -34,6 +35,7 @@ Limitations of PPG System / Specifications
 		 || = Label Name
 		 ^ = Sprite Pointer
 		  # = Description
+		 ** = Array Pointer
 	 
 	 Opcodes
 	 ______________________________________________________________
@@ -131,15 +133,38 @@ Limitations of PPG System / Specifications
 		  :Main
 		      drawspr ExampleSprite SpriteX SpriteY SpriteScale SpriteSize
 		      jumpl Main
+		      
+	  arrset ** {Index Varible} or [] {Number Varible} or []  # Sets Data in an Array to a Number or Varible 
+	  arrload ** {Index Varible} or [] {OutPut Varible}  # Reads Number From a An Array Into a Varible
+	  arrwipe ** []  # Fills Array with a Number
+
+	  Example :
+		  arr MyArray 0  
+		  # The '0' is the Fill Character
+		  
+		  var Index 0
+		  
+		  arrset MyArray 1 1  # MyArray[1] = 0
+		  arrset MyArray Index 1  # MyArray[0] = 0 or MyArray[Index] = 0
+		  
+		  var ArrayData 0
+		  arrload MyArray 1 ArrayData  # ArrayData = MyArray[1]
+		  arrload MyArray Index ArrayData  # ArrayData = MyArray[0] or MyArray[Index}
+		  arrwipe MyArray 0
+		  
+		  
+		  
 ___
 **Data Types**
 ___
 	 var {Name} [] or '' # General Varible , Can Hold Text or Integer
 	 spr {Name} ''  # Sprite Pointer , Used for Holding Sprite Data
+	 arr {Name} [Fill Number]  # Simple Array, Only Numbers 
 	 
 	 Example :
 		 var MyVarible1 'Hello World'
 		 var MyVarible2 25
+		 arr MyArray 0
 		 spr ExampleSprite '+++++00+++++++++++++0770++00+++++000076600770+++07706066667660++06666666606660++066600666666660++06676000066660++07666666666660+067776666607666006777666666006600666776666666660+966776666666660++9966669966669+++++9999++9999+++++++++++++++++++++++++++++++++++'
 
 	 Labels
@@ -182,3 +207,4 @@ Thank You :)
 		  
 
 	 
+
