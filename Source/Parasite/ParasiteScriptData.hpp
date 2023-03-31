@@ -13,15 +13,15 @@ using namespace std;
 
 #define MaxJumpPoints 16384 //
 
+#define MaxArraySize 100
+
+#define MaxArrays 100
+
 static int VaribleCounter = 0;
 
 static int JumpPointCounter = 0;
 
-static int ProcessSpeed = 1;
-
-
-
-
+static int ArrayCounter = 0;
 
 
 Color PDBlue = {22, 114, 136 , 255};
@@ -44,6 +44,15 @@ typedef struct Memory{
 
 
 static Memory VaribleMemory[MaxVaribles];
+
+typedef struct ArrMemory{
+    string Name;
+    int Array[MaxArraySize];
+    int Size;
+}ArrMemory;
+
+
+static ArrMemory ArrayMemory[MaxArrays];
 
 typedef struct JumpPoint{
     string Name;

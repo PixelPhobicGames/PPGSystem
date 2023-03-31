@@ -1,0 +1,354 @@
+
+spr XSprite '2222222223++++322+3++3+22++33++22++33++22+3++3+223++++3222222222'
+spr OSprite '000000000+1111+001++++1001++++1001++++1001++++100+1111+000000000'
+spr BSprite '6666666667777776677777766777777667777776677777766777777666666666'
+spr Cursor '00++++++01000++++01110+++011110++01110++++0100+++++0++0++++++++0'
+
+spr PPGLogo '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++000++8++00++000+++5+++00+++++++++0++++++0++++0+++5+5++0++++++++++0+++8++0++++0+++555++0++++++++++0+++8++00+++0+++5+5++00+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++111++222++000++++++++++++++++++++1+++2+2++0++++++++++++++++++++++1+++2+2++00+++++++++++++++++++++1+++222++000+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++0000000+++1111++1111++1111++++++0111110+++1++1++1++1++1++1++++++0122210+++1++1++1++1++1++1++++++0124210+++1111++1111++1111++++++0122210+++1+++++1++++++++1++++++0111110+++1+++++1++++++++1++++++0000000+++1+++++1+++++1111++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+var LogoSize 32
+var LogoScale 4
+var LX 170
+var LY 20
+
+var SpriteSizes 8
+var Scale 6
+var X 0
+var Y 0
+
+var CursorX 0
+var CursorY 0
+var CursorScale 2
+
+var Temp 0
+
+// Board Array
+arr Board 0
+
+// Process Speed
+pspeed 250
+
+var Input 0
+
+// X or O 
+var Key 1
+
+
+// For Math Ops
+
+var Temp1 0
+var Temp2 0
+
+jumpl Main
+
+
+:RunCursorLogic
+    wipe 
+
+    setv Temp1 CursorY
+    div Temp1 48
+
+    mul Temp1 3
+
+    setv Temp2 CursorX
+    div Temp2 48
+
+    addv Temp1 Temp2
+
+    arrset Board Temp1 Key
+
+
+    jumpl Main
+
+:Main
+    clear
+    set X 0
+    set Y 0
+    set Temp 0
+
+    drawspr PPGLogo LX LY LogoScale LogoSize
+
+    wipe
+    jumpl DrawBoard
+
+
+    jumpl Main
+
+
+:Up00
+    sub CursorY 48
+    delay 10
+    jumpl Main
+
+:Right
+    add CursorX 48
+    delay 10
+    jumpl Main
+
+:Down
+    add CursorY 48
+    delay 10
+    jumpl Main
+
+:Left
+    sub CursorX 48
+    delay 10
+    jumpl Main
+
+:A000
+    set Key 1
+    jumpl RunCursorLogic
+
+:S000
+    set Key 2
+    jumpl RunCursorLogic
+
+:ResetBoard
+    arrwipe Board 0
+    jumpl Main
+// Drawing Function 
+
+:DrawBoard
+    wipe
+    arrload Board 0 Temp
+    cmpvi Temp 1
+    jife DX0
+    jifg DO0
+    jifl DB0
+
+    wipe
+    arrload Board 1 Temp
+    cmpvi Temp 1
+    jife DX1
+    jifg DO1
+    jifl DB1
+
+    wipe
+    arrload Board 2 Temp
+    cmpvi Temp 1
+    jife DX2
+    jifg DO2
+    jifl DB2
+
+    wipe
+    arrload Board 3 Temp
+    cmpvi Temp 1
+    jife DX3
+    jifg DO3
+    jifl DB3
+
+    wipe
+    arrload Board 4 Temp
+    cmpvi Temp 1
+    jife DX4
+    jifg DO4
+    jifl DB4
+
+    wipe
+    arrload Board 5 Temp
+    cmpvi Temp 1
+    jife DX5
+    jifg DO5
+    jifl DB5
+
+    wipe
+    arrload Board 6 Temp
+    cmpvi Temp 1
+    jife DX6
+    jifg DO6
+    jifl DB6
+
+    wipe
+    arrload Board 7 Temp
+    cmpvi Temp 1
+    jife DX7
+    jifg DO7
+    jifl DB7
+
+    wipe
+    arrload Board 8 Temp
+    cmpvi Temp 1
+    jife DX8
+    jifg DO8
+    jifl DB8
+
+    drawspr Cursor CursorX CursorY CursorScale SpriteSizes
+    wipe
+    pullinp Input
+    cmpvi Input 1
+    jife Up00
+    cmpvi Input 2
+    jife Right
+    cmpvi Input 3
+    jife Down
+    cmpvi Input 4
+    jife Left
+
+    wipe
+    cmpvi Input 6
+    jife A000
+
+    wipe
+    cmpvi Input 7
+    jife S000
+
+    wipe
+    cmpvi Input 5
+    jife ResetBoard
+
+    wipe
+
+    jumpl Main
+
+
+// For Drawing Each Board Position 0-8
+
+:DX0
+    drawspr XSprite X Y Scale SpriteSizes
+    ret
+
+:DO0
+    drawspr OSprite X Y Scale SpriteSizes
+    ret
+
+:DB0
+    drawspr BSprite X Y Scale SpriteSizes
+    ret
+
+:DX1
+    set X 48
+    drawspr XSprite X Y Scale SpriteSizes
+    ret
+
+:DO1
+    set X 48
+    drawspr OSprite X Y Scale SpriteSizes
+    ret
+
+:DB1
+    set X 48
+    drawspr BSprite X Y Scale SpriteSizes
+    ret
+
+:DX2
+    set X 96
+    drawspr XSprite X Y Scale SpriteSizes
+    ret
+
+:DO2
+    set X 96
+    drawspr OSprite X Y Scale SpriteSizes
+    ret
+
+:DB2
+    set X 96
+    drawspr BSprite X Y Scale SpriteSizes
+    ret
+
+:DX3
+    set X 0
+    set Y 48
+    drawspr XSprite X Y Scale SpriteSizes
+    ret
+
+:DO3
+    set X 0
+    set Y 48
+    drawspr OSprite X Y Scale SpriteSizes
+    ret
+
+:DB3
+    set X 0
+    set Y 48
+    drawspr BSprite X Y Scale SpriteSizes
+    ret
+
+:DX4
+    set X 48
+    set Y 48
+    drawspr XSprite X Y Scale SpriteSizes
+    ret
+
+:DO4
+    set X 48
+    set Y 48
+    drawspr OSprite X Y Scale SpriteSizes
+    ret
+
+:DB4
+    set X 48
+    set Y 48
+    drawspr BSprite X Y Scale SpriteSizes
+    ret
+
+:DX5
+    set X 96
+    set Y 48
+    drawspr XSprite X Y Scale SpriteSizes
+    ret
+
+:DO5
+    set X 96
+    set Y 48
+    drawspr OSprite X Y Scale SpriteSizes
+    ret
+
+:DB5
+    set X 96
+    set Y 48
+    drawspr BSprite X Y Scale SpriteSizes
+    ret
+
+:DX6
+    set X 0
+    set Y 96
+    drawspr XSprite X Y Scale SpriteSizes
+    ret
+
+:DO6
+    set X 0
+    set Y 96
+    drawspr OSprite X Y Scale SpriteSizes
+    ret
+
+:DB6
+    set X 0
+    set Y 96
+    drawspr BSprite X Y Scale SpriteSizes
+    ret
+
+:DX7
+    set X 48
+    set Y 96
+    drawspr XSprite X Y Scale SpriteSizes
+    ret
+
+:DO7
+    set X 48
+    set Y 96
+    drawspr OSprite X Y Scale SpriteSizes
+    ret
+
+:DB7
+    set X 48
+    set Y 96
+    drawspr BSprite X Y Scale SpriteSizes
+    ret
+
+:DX8
+    set X 96
+    set Y 96
+    drawspr XSprite X Y Scale SpriteSizes
+    ret
+
+:DO8
+    set X 96
+    set Y 96
+    drawspr OSprite X Y Scale SpriteSizes
+    ret
+
+:DB8
+    set X 96
+    set Y 96
+    drawspr BSprite X Y Scale SpriteSizes
+    ret
+

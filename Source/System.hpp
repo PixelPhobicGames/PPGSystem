@@ -25,7 +25,7 @@ class System{
 
 static System PPGSystem;
 
-
+static bool DisplaySpeed = false;
 static bool TerminalRunning = true;
 static bool SpriteEditorRunning = false;
 static bool TextEditorRunning = false;
@@ -286,7 +286,7 @@ void DisplayTerminal(){
                     AppName += PPGSystem.TerminalData[x];
                 }
 
-                cout << TextFormat("Apps/%ls.ps" ,AppName.c_str());
+                if (Debug)cout << TextFormat("Apps/%ls.ps" ,AppName.c_str());
             
                 LoadScript(TextFormat("Apps/%ls.ps" ,AppName.c_str()));
                 TerminalRunning = false; // Launch Into App
