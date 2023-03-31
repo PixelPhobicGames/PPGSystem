@@ -23,6 +23,7 @@ static int JumpPointCounter = 0;
 
 static int ArrayCounter = 0;
 
+static int DisplayScale = 1;
 
 Color PDBlue = {22, 114, 136 , 255};
 Color PLBlue = {140, 218, 236 , 255};

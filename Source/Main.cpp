@@ -43,7 +43,17 @@ int main(int argc, char *argv[])
         else {
             TimeDelay --;
         }
-        if (DisplaySpeed)DrawText(TextFormat("CPS: %i" , InstructionsPerTick * GetFPS() ) , 0 , 220 , 10 , WHITE);
+        if (DisplaySpeed)DrawText(TextFormat("CPS: %i" , InstructionsPerTick * GetFPS() ) , 0 , 220 * DisplayScale , 10 * DisplayScale , WHITE);
+
+        if (IsKeyPressed(KEY_F2)){
+            DisplayScale += 1;
+            SetWindowSize(320 * DisplayScale, 240 * DisplayScale);
+        }
+
+        if (IsKeyPressed(KEY_F1) && DisplayScale != 1){
+            DisplayScale -= 1;
+            SetWindowSize(320 * DisplayScale, 240 * DisplayScale);
+        }
 
         EndDrawing();
     }

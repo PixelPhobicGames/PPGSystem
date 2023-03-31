@@ -758,34 +758,34 @@ auto CycleInstruction(){
                                 for (int y = 0 ; y <= Size - 1 ; y ++){
                                     switch(VaribleMemory[i].Value[y * Size + x]){
                                         case L'0':
-                                            DrawRectangle((x * Scale) + X, (y * Scale) + Y , Scale , Scale, PDBlue);
+                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDBlue);
                                             break;
                                         case L'1':
-                                            DrawRectangle((x * Scale) + X, (y * Scale) + Y , Scale , Scale, PLBlue);
+                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLBlue);
                                             break;
                                         case L'2':
-                                            DrawRectangle((x * Scale) + X, (y * Scale) + Y , Scale , Scale, PDRed);
+                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDRed);
                                             break;
                                         case L'3':
-                                            DrawRectangle((x * Scale) + X, (y * Scale) + Y , Scale , Scale, PLRed);
+                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLRed);
                                             break;
                                         case L'4':
-                                            DrawRectangle((x * Scale) + X, (y * Scale) + Y , Scale , Scale, PDYellow);
+                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDYellow);
                                             break;
                                         case L'5':
-                                            DrawRectangle((x * Scale) + X, (y * Scale) + Y , Scale , Scale, PLYellow);
+                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLYellow);
                                             break;
                                         case L'6':
-                                            DrawRectangle((x * Scale) + X, (y * Scale) + Y , Scale , Scale, PDPurple);
+                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDPurple);
                                             break;
                                         case L'7':
-                                            DrawRectangle((x * Scale) + X, (y * Scale) + Y , Scale , Scale, PLPurple);
+                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLPurple);
                                             break;
                                         case L'8':
-                                            DrawRectangle((x * Scale) + X, (y * Scale) + Y , Scale , Scale, PDGreen);
+                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDGreen);
                                             break;
                                         case L'9':
-                                            DrawRectangle((x * Scale) + X, (y * Scale) + Y , Scale , Scale, PLGreen);
+                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLGreen);
                                             break;
                                     }
                                 }
