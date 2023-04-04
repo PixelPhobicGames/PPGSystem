@@ -30,6 +30,7 @@ void ParasiteScriptInit(){ // Resets all Flags
     ParasiteScriptCoreData.NotEqualFlag = false;
 
     ParasiteScriptCoreData.CompareFlag = false;
+    ParasiteScriptCoreData.ContinueFlag = true;
 
     ParasiteScriptCoreData.ReturnLine = 0;
     ParasiteScriptCoreData.Line[0] = '\0';
@@ -41,6 +42,7 @@ void ParasiteScriptInit(){ // Resets all Flags
         VaribleMemory[i].IValue = 0;
     }
 }
+
 auto ReadValue(string Data , int Start , int End){ // Reads Value from (Start to End) 
     string Out;
     for (int i = Start ; i <= End ; i ++){
@@ -158,6 +160,64 @@ auto StringToChar(string Data){
     return Out;
 }
 
+auto ScanVaribleMemory(string VaribleName){
+    bool Found = false;
+    for (int x = 0 ; x <= VaribleCounter; x++){
+        if (VaribleMemory[x].Name == VaribleName){
+            Found = true;
+        }
+    }
+    return Found;
+}
+
+auto PullIntFromMemory(string VaribleName){
+    bool Found = false;
+    for (int x = 0 ; x <= VaribleCounter; x++){
+        if (VaribleMemory[x].Name == VaribleName){
+            Found = true;
+            return VaribleMemory[x].IValue;
+        }
+    }
+    if (!Found){
+        cout << "Error Varible Not Declared: " << VaribleName << "\n";
+    }
+}
+auto PullStrFromMemory(string VaribleName){
+    for (int x = 0 ; x <= VaribleCounter; x++){
+        if (VaribleMemory[x].Name == VaribleName){
+            return VaribleMemory[x].Value;
+        }
+    }
+}
+auto StoreIntToMemory(string VaribleName, int Value){
+    for (int x = 0 ; x <= VaribleCounter; x++){
+        if (VaribleMemory[x].Name == VaribleName){
+            VaribleMemory[x].IValue = Value;
+        }
+    }
+}
+
+auto StoreStrtoMemory(string VaribleName, string Value){
+    for (int x = 0 ; x <= VaribleCounter; x++){
+        if (VaribleMemory[x].Name == VaribleName){
+            VaribleMemory[x].Value = Value;
+        }
+    }
+}
+
+string RemoveSpaces(string Data)
+{
+    string OutData = "";
+
+    for (int i = 0 ; i <= Data.size() ; i ++){
+        if (Data[i] != ' '){
+            OutData[i] = Data[i];
+        }
+    }
+
+    return OutData;
+}
+
 void LoadScript(const char *ScriptPath){ // Loads Script
     istringstream ProgramData(ParasiteScriptLoadFile(ScriptPath));
     string CurrentLine;
@@ -165,7 +225,7 @@ void LoadScript(const char *ScriptPath){ // Loads Script
     while (getline(ProgramData, CurrentLine)) {
 
         if (ReadValue(CurrentLine, 0 , 0) == ":"){            
-            JumpPoints[JumpPointCounter].Name = ReadValue(CurrentLine, 1 , 4);
+            JumpPoints[JumpPointCounter].Name = ReadValue(CurrentLine, 1 , CurrentLine.size() - 1);
             JumpPoints[JumpPointCounter].LineNumber = ParasiteScriptCoreData.LineCounter;
             JumpPointCounter ++;
         }
@@ -200,7 +260,7 @@ bool IsNumber(const string& s)
     return true;
  }
 
-static int InstructionsPerTick = 8;
+static int InstructionsPerTick = 32;
 static int TimeDelay = 0;
 
 auto CycleInstruction(){
@@ -209,153 +269,251 @@ auto CycleInstruction(){
             
             string Instruction = ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter];
 
-            if (SplitValue(Instruction, 0 ) == "stop"){
-                exit(0);
-            }
-            if (SplitValue(Instruction, 0 ) == "clear"){
-                ClearBackground(BLACK);
+            if (SplitValue(Instruction, 0 ) == "end"){
+                ParasiteScriptCoreData.ContinueFlag = true;
             }
 
-            if (SplitValue(Instruction, 0 ) == "delay"){
-                TimeDelay = StringToInt(SplitValue(Instruction, 1 ));
-            }
+            if (ParasiteScriptCoreData.ContinueFlag){
+                if (SplitValue(Instruction, 0 ) == "if"){
 
-            if (SplitValue(Instruction, 0 ) == "pspeed"){
-                InstructionsPerTick = StringToInt(SplitValue(Instruction, 1 ));
-            }
+                    ParasiteScriptCoreData.ContinueFlag = true;
+                    ParasiteScriptCoreData.ElseFlag = false;
 
-            if (SplitValue(Instruction, 0 ) == "arr"){
-                ArrayMemory[ArrayCounter].Name = SplitValue(Instruction, 1 );
-                if (Debug)cout << "Initializing New Array\n";
-                for (int i = 0 ; i <= MaxArraySize; i ++){
-                    ArrayMemory[ArrayCounter].Array[i] = StringToInt(SplitValue(Instruction, 2 ));
-                }
-                ArrayCounter ++;
-            }
+                    string Operator = SplitValue(Instruction, 2 );
+                    int Value1 = 0;
+                    int Value2 = 0;
 
-            if (SplitValue(Instruction, 0 ) == "arrwipe"){
-
-                for (int i = 0 ; i <= ArrayCounter; i++){
-                    if (ArrayMemory[i].Name == SplitValue(Instruction, 1 )){
-                        if (Debug)cout << "Initializing Array\n";
-                        for (int x = 0 ; x <= MaxArraySize; x ++){
-                            ArrayMemory[i].Array[x] = StringToInt(SplitValue(Instruction, 2 ));
-                        }
+                    if (IsNumber(SplitValue(Instruction, 1))){
+                        Value1 = StringToInt(SplitValue(Instruction, 1 ));
                     }
-                    
-                }
-            }
+                    else {
+                        Value1 = PullIntFromMemory(SplitValue(Instruction, 1 ));
+                    }
 
-            if (SplitValue(Instruction, 0 ) == "arrload"){ // arrload TestArray 1 Varible
-                for (int i = 0 ; i <= ArrayCounter; i++){
-                    if (ArrayMemory[i].Name == SplitValue(Instruction, 1 )){
+                    if (IsNumber(SplitValue(Instruction, 3))){
+                        Value2 = StringToInt(SplitValue(Instruction, 3 ));
+                    }
+                    else {
+                        Value2 = PullIntFromMemory(SplitValue(Instruction, 3 ));
+                    }
 
-                        int IndexValue = 0;
-
-                        if (IsNumber(SplitValue(Instruction, 2 ))){
-                            IndexValue = StringToInt(SplitValue(Instruction, 2 ));
+                    if (Operator == "=="){
+                        if (Value1 == Value2){
+                            ParasiteScriptCoreData.ContinueFlag = true;
                         }
                         else {
-                            for (int x = 0 ; x <= VaribleCounter; x++){
-                                if (VaribleMemory[x].Name == SplitValue(Instruction, 2 )){
-                                    IndexValue = VaribleMemory[x].IValue;
-                                }
+                            ParasiteScriptCoreData.ContinueFlag = false;
+                            ParasiteScriptCoreData.ElseFlag = true;
+                        }
+                    }
+
+                    if (Operator == ">"){
+                        if (Value1 > Value2){
+                            ParasiteScriptCoreData.ContinueFlag = true;
+                        }
+                        else {
+                            ParasiteScriptCoreData.ContinueFlag = false;
+                            ParasiteScriptCoreData.ElseFlag = true;
+                        }
+                    }
+
+                    if (Operator == "<"){
+                        if (Value1 < Value2){
+                            ParasiteScriptCoreData.ContinueFlag = true;
+                        }
+                        else {
+                            ParasiteScriptCoreData.ContinueFlag = false;
+                            ParasiteScriptCoreData.ElseFlag = true;
+                        }
+                    }
+
+                    if (Operator == ">="){
+                        if (Value1 >= Value2){
+                            ParasiteScriptCoreData.ContinueFlag = true;
+                        }
+                        else {
+                            ParasiteScriptCoreData.ContinueFlag = false;
+                            ParasiteScriptCoreData.ElseFlag = true;
+                        }
+                    }
+
+                    if (Operator == "<="){
+                        if (Value1 >= Value2){
+                            ParasiteScriptCoreData.ContinueFlag = true;
+                        }
+                        else {
+                            ParasiteScriptCoreData.ContinueFlag = false;
+                            ParasiteScriptCoreData.ElseFlag = true;
+                        }
+                    }
+
+                    if (Operator == "!="){
+                        if (Value1 >= Value2){
+                            ParasiteScriptCoreData.ContinueFlag = true;
+                        }
+                        else {
+                            ParasiteScriptCoreData.ContinueFlag = false;
+                            ParasiteScriptCoreData.ElseFlag = true;
+                        }
+                    }
+                }
+
+                if (SplitValue(Instruction, 0 ) == "else"){
+                    if (!ParasiteScriptCoreData.ElseFlag){
+                        ParasiteScriptCoreData.ContinueFlag = false;
+                    }
+                }
+
+                if (SplitValue(Instruction, 0 ) == "stop"){
+                    exit(0);
+                }
+                if (SplitValue(Instruction, 0 ) == "clear"){
+                    ClearBackground(BLACK);
+                }
+
+                if (SplitValue(Instruction, 0 ) == "delay"){
+                    TimeDelay = StringToInt(SplitValue(Instruction, 1 ));
+                }
+
+                if (SplitValue(Instruction, 0 ) == "pspeed"){
+                    if (IsNumber(SplitValue(Instruction, 1 ))){
+                        InstructionsPerTick = StringToInt(SplitValue(Instruction, 1 ));
+                    }
+                    else {
+                        InstructionsPerTick = PullIntFromMemory(SplitValue(Instruction, 1 ));
+                    }
+                }
+
+                if (SplitValue(Instruction, 0 ) == "arr"){
+                    ArrayMemory[ArrayCounter].Name = SplitValue(Instruction, 1 );
+                    if (Debug)cout << "Initializing New Array\n";
+                    for (int i = 0 ; i <= MaxArraySize; i ++){
+                        ArrayMemory[ArrayCounter].Array[i] = StringToInt(SplitValue(Instruction, 2 ));
+                    }
+                    ArrayCounter ++;
+                }
+
+                if (SplitValue(Instruction, 0 ) == "arrwipe"){
+
+                    for (int i = 0 ; i <= ArrayCounter; i++){
+                        if (ArrayMemory[i].Name == SplitValue(Instruction, 1 )){
+                            if (Debug)cout << "Initializing Array\n";
+                            for (int x = 0 ; x <= MaxArraySize; x ++){
+                                ArrayMemory[i].Array[x] = StringToInt(SplitValue(Instruction, 2 ));
                             }
                         }
-
-                        for (int x = 0 ; x <= VaribleCounter; x++){
-                            if (VaribleMemory[x].Name == SplitValue(Instruction, 3 )){
-                                if (IndexValue <= MaxArraySize){
-                                    VaribleMemory[x].IValue = ArrayMemory[i].Array[IndexValue];
-                                    if (Debug)cout << "Loaded " << VaribleMemory[x].IValue  << " Into " << VaribleMemory[x].Name << " From " << ArrayMemory[i].Name << " Index " << IndexValue << "\n";
-                                }
-                            }
-                        }
-
-
                         
                     }
                 }
-            }
 
-            if (SplitValue(Instruction, 0 ) == "arrset"){ // arrset TestArray 1 Varible
-                for (int i = 0 ; i <= ArrayCounter; i++){
-                    if (ArrayMemory[i].Name == SplitValue(Instruction, 1 )){
+                if (SplitValue(Instruction, 0 ) == "arrload"){ // arrload TestArray 1 Varible
+                    for (int i = 0 ; i <= ArrayCounter; i++){
+                        if (ArrayMemory[i].Name == SplitValue(Instruction, 1 )){
 
-                        int IndexValue = 0;
+                            int IndexValue = 0;
 
-                        if (IsNumber(SplitValue(Instruction, 2 ))){
-                            IndexValue = StringToInt(SplitValue(Instruction, 2 ));
-                        }
-                        else {
-                            for (int x = 0 ; x <= VaribleCounter; x++){
-                                if (VaribleMemory[x].Name == SplitValue(Instruction, 2 )){
-                                    IndexValue = VaribleMemory[x].IValue;
+                            if (IsNumber(SplitValue(Instruction, 2 ))){
+                                IndexValue = StringToInt(SplitValue(Instruction, 2 ));
+                            }
+                            else {
+                                for (int x = 0 ; x <= VaribleCounter; x++){
+                                    if (VaribleMemory[x].Name == SplitValue(Instruction, 2 )){
+                                        IndexValue = VaribleMemory[x].IValue;
+                                    }
                                 }
                             }
-                        }
 
-                        if (!IsNumber(SplitValue(Instruction, 3 ))){
                             for (int x = 0 ; x <= VaribleCounter; x++){
                                 if (VaribleMemory[x].Name == SplitValue(Instruction, 3 )){
                                     if (IndexValue <= MaxArraySize){
-                                        ArrayMemory[i].Array[IndexValue] = VaribleMemory[x].IValue ;
+                                        VaribleMemory[x].IValue = ArrayMemory[i].Array[IndexValue];
+                                        if (Debug)cout << "Loaded " << VaribleMemory[x].IValue  << " Into " << VaribleMemory[x].Name << " From " << ArrayMemory[i].Name << " Index " << IndexValue << "\n";
                                     }
                                 }
                             }
                         }
-                        else {
-                            if (IndexValue <= MaxArraySize){
-                                ArrayMemory[i].Array[IndexValue] = StringToInt(SplitValue(Instruction, 3 ));
+                    }
+                }
+
+                if (SplitValue(Instruction, 0 ) == "arrset"){ // arrset TestArray 1 Varible
+                    for (int i = 0 ; i <= ArrayCounter; i++){
+                        if (ArrayMemory[i].Name == SplitValue(Instruction, 1 )){
+
+                            int IndexValue = 0;
+
+                            if (IsNumber(SplitValue(Instruction, 2 ))){
+                                IndexValue = StringToInt(SplitValue(Instruction, 2 ));
+                            }
+                            else {
+                                for (int x = 0 ; x <= VaribleCounter; x++){
+                                    if (VaribleMemory[x].Name == SplitValue(Instruction, 2 )){
+                                        IndexValue = VaribleMemory[x].IValue;
+                                    }
+                                }
+                            }
+
+                            if (!IsNumber(SplitValue(Instruction, 3 ))){
+                                for (int x = 0 ; x <= VaribleCounter; x++){
+                                    if (VaribleMemory[x].Name == SplitValue(Instruction, 3 )){
+                                        if (IndexValue <= MaxArraySize){
+                                            ArrayMemory[i].Array[IndexValue] = VaribleMemory[x].IValue ;
+                                        }
+                                    }
+                                }
+                            }
+                            else {
+                                if (IndexValue <= MaxArraySize){
+                                    ArrayMemory[i].Array[IndexValue] = StringToInt(SplitValue(Instruction, 3 ));
+                                }
+                            }
+                            if (Debug)cout << "Array Set\n";
+                        }
+                    }
+                }
+
+                if (SplitValue(Instruction, 0 ) == "var" || SplitValue(Instruction, 0 ) == "spr"){
+                    VaribleMemory[VaribleCounter].Name = SplitValue(Instruction, 1 );
+
+                    string VaribleData = SplitValue(Instruction, 2 );
+                    int VaribleType = 0;
+
+                    if (Debug)cout << RedText << "VD: " << VaribleData << " ";
+
+                    if (ReadValue(VaribleData , 0 , 0) == "'"){
+                        if (Debug)cout << "String Type\n";
+                        VaribleType = 1;
+                    }
+                    else {
+                        if (Debug)cout << "Int Type\n";
+                        VaribleType = 0;
+
+                    }
+                    
+                    if (VaribleType == 1){
+                        string StoredData = "";
+                        for (int i = 0 ; i <= VaribleData.size() ; i ++){
+                            if (ReadValue(VaribleData , i , i) != "'"){
+                                StoredData += ReadValue(VaribleData , i , i);
                             }
                         }
-                        if (Debug)cout << "Array Set\n";
+                        if (Debug)cout << "Parsed String: " << StoredData << "\n"; 
+                        VaribleMemory[VaribleCounter].Value = StoredData;
+                        VaribleMemory[VaribleCounter].IValue = 0;
                     }
-                }
-            }
-
-            if (SplitValue(Instruction, 0 ) == "var" || SplitValue(Instruction, 0 ) == "spr"){
-                VaribleMemory[VaribleCounter].Name = SplitValue(Instruction, 1 );
-
-                string VaribleData = SplitValue(Instruction, 2 );
-                int VaribleType = 0;
-
-                if (Debug)cout << RedText << "VD: " << VaribleData << " ";
-
-                if (ReadValue(VaribleData , 0 , 0) == "'"){
-                    if (Debug)cout << "String Type\n";
-                    VaribleType = 1;
-                }
-                else {
-                    if (Debug)cout << "Int Type\n";
-                    VaribleType = 0;
-
-                }
-                
-                if (VaribleType == 1){
-                    string StoredData = "";
-                    for (int i = 0 ; i <= VaribleData.size() ; i ++){
-                        if (ReadValue(VaribleData , i , i) != "'"){
-                            StoredData += ReadValue(VaribleData , i , i);
-                        }
+                    else {
+                        VaribleMemory[VaribleCounter].IValue = StringToInt(VaribleData);
+                        VaribleMemory[VaribleCounter].Value = " ";
                     }
-                    if (Debug)cout << "Parsed String: " << StoredData << "\n"; 
-                    VaribleMemory[VaribleCounter].Value = StoredData;
-                    VaribleMemory[VaribleCounter].IValue = 0;
-                }
-                else {
-                    VaribleMemory[VaribleCounter].IValue = StringToInt(VaribleData);
-                    VaribleMemory[VaribleCounter].Value = " ";
 
-                }
-                VaribleCounter++;   
+                    VaribleCounter++;   
+
                 }
 
                 if (SplitValue(Instruction, 0 ) == "jumpl"){   
                     for (int i = 0 ; i <= JumpPointCounter ; i ++){
-                        if (JumpPoints[i].Name == ReadValue(Instruction, 6 , 9)){
-                                ParasiteScriptCoreData.ReturnLine = ParasiteScriptCoreData.LineCounter;
-                                ParasiteScriptCoreData.LineCounter = JumpPoints[i].LineNumber;
+                        if (JumpPoints[i].Name == SplitValue(Instruction, 1)){
+                            ParasiteScriptCoreData.ReturnLine = ParasiteScriptCoreData.LineCounter;
+                            ParasiteScriptCoreData.LineCounter = JumpPoints[i].LineNumber;
                         }
                     }
                 }
@@ -365,281 +523,157 @@ auto CycleInstruction(){
                     }
                 }
 
-                if (SplitValue(Instruction, 0 ) == "addv"){   
-                    int Value1 = 0;
-                    int Value2 = 0;
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            Value1 = VaribleMemory[i].IValue;
-                        }
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 2 )){
-                            Value2 = VaribleMemory[i].IValue;
-                        }
-                    }
-
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            VaribleMemory[i].IValue = Value1 + Value2;
-                            if (Debug)cout << BlueText << "addv Result:"<< VaribleMemory[i].IValue << "\n";
-                        }
-                    }
-                }
-
-                if (SplitValue(Instruction, 0 ) == "subv"){   
-                    int Value1 = 0;
-                    int Value2 = 0;
-
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 2 )){
-                            Value2 = VaribleMemory[i].IValue;
-                        }
-                    }
-
-
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            VaribleMemory[i].IValue = VaribleMemory[i].IValue - Value2;
-                            if (Debug)cout << BlueText << "subv Result:"<< VaribleMemory[i].IValue << "\n";
-                        }
-                    }
-                }
-
-                if (SplitValue(Instruction, 0 ) == "mulv"){   
-                    int Value1 = 0;
-                    int Value2 = 0;
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            Value1 = VaribleMemory[i].IValue;
-                        }
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 2 )){
-                            Value2 = VaribleMemory[i].IValue;
-                        }
-                    }
-
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            VaribleMemory[i].IValue = Value1 * Value2;
-                            if (Debug)cout << BlueText << "mulv Result:"<< VaribleMemory[i].IValue << "\n";
-                        }
-                    }
-                }
-
-                if (SplitValue(Instruction, 0 ) == "divv"){   
-                    int Value1 = 0;
-                    int Value2 = 0;
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            Value1 = VaribleMemory[i].IValue;
-                        }
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 2 )){
-                            Value2 = VaribleMemory[i].IValue;
-                        }
-                    }
-
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            VaribleMemory[i].IValue = Value1 / Value2;
-                            if (Debug)cout << BlueText << "divv Result:"<< VaribleMemory[i].IValue << "\n";
-                        }
-                    }
-                }
-
                 if (SplitValue(Instruction, 0 ) == "add"){   
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            VaribleMemory[i].IValue += StringToInt(SplitValue(Instruction, 2 ));
-                            if (Debug)cout << BlueText << "add Result:"<< VaribleMemory[i].IValue << "\n";
-                        }
+                    int Value1 = PullIntFromMemory(SplitValue(Instruction, 1));
+                    int Value2 = 0;
+
+                    if (IsNumber(SplitValue(Instruction, 2))){
+                        Value2 = StringToInt(SplitValue(Instruction, 2));
                     }
+                    else {
+                        Value2 = PullIntFromMemory(SplitValue(Instruction, 2));
+                    }
+
+                    StoreIntToMemory(SplitValue(Instruction, 1 ) , (Value1 + Value2));
+
+                    if (Debug)cout << BlueText << "add Result:"<< PullIntFromMemory(SplitValue(Instruction, 1)) << "\n";
                 }
 
                 if (SplitValue(Instruction, 0 ) == "sub"){   
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            VaribleMemory[i].IValue -= StringToInt(SplitValue(Instruction, 2 ));
-                            if (Debug)cout << BlueText << "sub Result:"<< VaribleMemory[i].IValue << "\n";
-                        }
+                    int Value1 = PullIntFromMemory(SplitValue(Instruction, 1));
+                    int Value2 = 0;
+
+                    if (IsNumber(SplitValue(Instruction, 2))){
+                        Value2 = StringToInt(SplitValue(Instruction, 2));
                     }
+                    else {
+                        Value2 = PullIntFromMemory(SplitValue(Instruction, 2));
+                    }
+
+                    StoreIntToMemory(SplitValue(Instruction, 1 ) , (Value1 - Value2));
+
+                    if (Debug)cout << BlueText << "sub Result:"<< PullIntFromMemory(SplitValue(Instruction, 1)) << "\n";
                 }
 
                 if (SplitValue(Instruction, 0 ) == "mul"){   
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            VaribleMemory[i].IValue = VaribleMemory[i].IValue * StringToInt(SplitValue(Instruction, 2 ));
-                            if (Debug)cout << BlueText << "mul Result:"<< VaribleMemory[i].IValue << "\n";
-                        }
+                    int Value1 = PullIntFromMemory(SplitValue(Instruction, 1));
+                    int Value2 = 0;
+
+                    if (IsNumber(SplitValue(Instruction, 2))){
+                        Value2 = StringToInt(SplitValue(Instruction, 2));
                     }
+                    else {
+                        Value2 = PullIntFromMemory(SplitValue(Instruction, 2));
+                    }
+
+                    StoreIntToMemory(SplitValue(Instruction, 1 ) , (Value1 * Value2));
+
+                    if (Debug)cout << BlueText << "mul Result:"<< PullIntFromMemory(SplitValue(Instruction, 1)) << "\n";
                 }
 
                 if (SplitValue(Instruction, 0 ) == "div"){   
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            VaribleMemory[i].IValue = VaribleMemory[i].IValue / StringToInt(SplitValue(Instruction, 2 ));
-                            if (Debug)cout << BlueText << "div Result:"<< VaribleMemory[i].IValue << "\n";
-                        }
+                    int Value1 = PullIntFromMemory(SplitValue(Instruction, 1));
+                    int Value2 = 0;
+
+                    if (IsNumber(SplitValue(Instruction, 2))){
+                        Value2 = StringToInt(SplitValue(Instruction, 2));
                     }
+                    else {
+                        Value2 = PullIntFromMemory(SplitValue(Instruction, 2));
+                    }
+
+                    StoreIntToMemory(SplitValue(Instruction, 1 ) , (Value1 / Value2));
+
+                    if (Debug)cout << BlueText << "div Result:"<< PullIntFromMemory(SplitValue(Instruction, 1)) << "\n";
                 }
-            
+
                 if (SplitValue(Instruction, 0 ) == "set"){
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
+                    if (!ScanVaribleMemory(SplitValue(Instruction, 2 ))){
+                        string VaribleData = SplitValue(Instruction, 2 );
+                        int VaribleType = 0;
 
-                            string VaribleData = SplitValue(Instruction, 2 );
+                        if (Debug)cout << RedText << "set: " << VaribleData << " ";
 
-                            int VaribleType = 0;
-
-                            if (Debug)cout << RedText << "set: " << VaribleData << " ";
-
-                            if (ReadValue(VaribleData , 0 , 0) == "'"){
-                                if (Debug)cout << "String Type\n";
-                                VaribleType = 1;
-                            }
-                            else {
-                                if (Debug)cout << "Int Type\n";
-                                VaribleType = 0;
-
-                            }
-                            
-                            if (VaribleType == 1){
-                                string StoredData = "";
-                                for (int i = 0 ; i <= VaribleData.size() ; i ++){
-                                    if (ReadValue(VaribleData , i , i) != "'"){
-                                        StoredData += ReadValue(VaribleData , i , i);
-                                    }
-                                }
-                                if (Debug)cout << "Parsed String: " << StoredData << "\n"; 
-                                VaribleMemory[i].Value = StoredData;
-                            }
-                            else {
-                                VaribleMemory[i].IValue = StringToInt(VaribleData);
-                            }
-                        }
-                    }
-                }
-
-                if (SplitValue(Instruction, 0 ) == "setv"){   
-
-                    int InValue = 0;
-
-                    string InStringValue = "";
-                
-
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 2 )){
-                            InValue = VaribleMemory[i].IValue;
-                            InStringValue = VaribleMemory[i].Value;
-                        }
-                    }
-                
-
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            VaribleMemory[i].IValue = InValue;   
-                            VaribleMemory[i].Value = InStringValue;   
-
-                            if (Debug)cout << RedText << "setv: " << InValue << " \n" ;
-                        }
-                    }
-                }
-
-                if (SplitValue(Instruction, 0 ) == "settextsize"){   
-                    ParasiteScriptCoreData.TextSize = StringToInt(SplitValue(Instruction, 1 ));
-                }
-
-            
-                if (SplitValue(Instruction, 0 ) == "cmpvv"){   
-                    ParasiteScriptCoreData.CompareFlag = true;
-
-                    int V1 = false;
-                    int V2 = false;
-                    string V1Value;
-                    string V2Value; 
-
-                    int V1IValue = 0;
-                    int V2IValue = 0; 
-
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            V1 = true;
-                            if (VaribleMemory[i].IValue != 0){
-                                V1IValue = VaribleMemory[i].IValue;
-                            }
-                            else {
-                                V1Value = VaribleMemory[i].Value;
-                            }
-                        }
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 2 )){
-                            V2 = true;
-                            if (VaribleMemory[i].IValue != 0){
-                                V2IValue = VaribleMemory[i].IValue;
-                            }
-                            else {
-                                V2Value = VaribleMemory[i].Value;
-                            }
-                        }
-                    }
-                    if (V1 && V2){
-                        if (V2IValue == 0 && V1IValue == 0){
-                            if (V1Value == V2Value){
-                                ParasiteScriptCoreData.EqualFlag = true;
-                            }
-                            else {
-                                ParasiteScriptCoreData.NotEqualFlag = true;
-                            }
+                        if (ReadValue(VaribleData , 0 , 0) == "'"){
+                            if (Debug)cout << "String Type\n";
+                            VaribleType = 1;
                         }
                         else {
-                            if (V1IValue == V2IValue){
-                                ParasiteScriptCoreData.EqualFlag = true;
+                            if (Debug)cout << "Int Type\n";
+                            VaribleType = 0;
+                        }
+                        
+                        if (VaribleType == 1){
+                            string StoredData = "";
+                            for (int i = 0 ; i <= VaribleData.size() ; i ++){
+                                if (ReadValue(VaribleData , i , i) != "'"){
+                                    StoredData += ReadValue(VaribleData , i , i);
+                                }
                             }
-                            if (V1IValue != V2IValue){
-                                ParasiteScriptCoreData.NotEqualFlag = true;
-                            }
-                            if (V1IValue >= V2IValue){
-                                ParasiteScriptCoreData.GreaterFlag = true;
-                            }
-                            if (V1IValue <= V2IValue){
-                                ParasiteScriptCoreData.LesserFlag = true;
-                            }
+                            if (Debug)cout << "Parsed String: " << StoredData << "\n"; 
+                            StoreStrtoMemory(SplitValue(Instruction, 1 ) , StoredData);
+                        }
+                        else {
+                            StoreIntToMemory( SplitValue(Instruction, 1 ) , StringToInt(VaribleData));
                         }
                     }
-                }
+                    else {
+                        int IntValue = PullIntFromMemory(SplitValue(Instruction, 2 ));
+                        string StringValue = PullStrFromMemory(SplitValue(Instruction, 2 ));
 
-                if (SplitValue(Instruction, 0 ) == "cmpvi"){   
+                        StoreIntToMemory(SplitValue(Instruction, 1 ) , IntValue);   
+                        StoreStrtoMemory(SplitValue(Instruction, 1 ) , StringValue);
+
+                        if (Debug)cout << RedText << "set: " << IntValue << " \n" ;
+                    }
+                }
+            
+                if (SplitValue(Instruction, 0 ) == "cmp"){   
                     ParasiteScriptCoreData.CompareFlag = true;
 
-                    int V1 = false;
-                    int V2 = true;
+                    int V1IValue = PullIntFromMemory(SplitValue(Instruction, 1));
+                    string V1Value = PullStrFromMemory(SplitValue(Instruction, 1));
+                    
 
-                    int V1IValue = 0;
-                    int V2IValue = StringToInt(SplitValue(Instruction, 2 )); 
+                    int V2IValue = 0; 
+                    string V2Value; 
 
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            V1 = true;
-                            V1IValue = VaribleMemory[i].IValue;
-                        }
+                    if (IsNumber(SplitValue(Instruction, 2))){
+                        V2IValue = StringToInt(SplitValue(Instruction, 2));
                     }
-                    if (V1 && V2){
-                        if (V1IValue == V2IValue){
+                    else {
+                        V2IValue = PullIntFromMemory(SplitValue(Instruction, 2));
+                        V2Value = PullStrFromMemory(SplitValue(Instruction, 2));
+                    }
+
+                    if (V2IValue == 0 && V1IValue == 0){
+                        if (V1Value == V2Value){
                             ParasiteScriptCoreData.EqualFlag = true;
                         }
-                        if (V1IValue != V2IValue){
+                        else{
                             ParasiteScriptCoreData.NotEqualFlag = true;
                         }
-                        if (V1IValue >= V2IValue){
-                            ParasiteScriptCoreData.GreaterFlag = true;
-                        }
-                        if (V1IValue <= V2IValue){
-                            ParasiteScriptCoreData.LesserFlag = true;
-                        }
                     }
-                }
 
+                    if (V1IValue == V2IValue){
+                        ParasiteScriptCoreData.EqualFlag = true;
+                    }
+                    if (V1IValue != V2IValue){
+                        ParasiteScriptCoreData.NotEqualFlag = true;
+                    }
+                    if (V1IValue >= V2IValue){
+                        ParasiteScriptCoreData.GreaterFlag = true;
+                    }
+                    if (V1IValue <= V2IValue){
+                        ParasiteScriptCoreData.LesserFlag = true;
+                    }
+
+                }
 
                 if ( SplitValue(Instruction, 0 ) == "jifne"){  
                     if(ParasiteScriptCoreData.NotEqualFlag){
                         for (int i = 0 ; i <= JumpPointCounter ; i ++){
-                            if (JumpPoints[i].Name == ReadValue(Instruction, 6 , 9)){
+                            if (JumpPoints[i].Name == SplitValue(Instruction, 1)){
                                 ParasiteScriptCoreData.ReturnLine = ParasiteScriptCoreData.LineCounter;
                                 ParasiteScriptCoreData.LineCounter = JumpPoints[i].LineNumber;
                                 ParasiteScriptCoreData.NotEqualFlag = false;
@@ -651,7 +685,7 @@ auto CycleInstruction(){
                 if (SplitValue(Instruction, 0 ) == "jife"){  
                     if(ParasiteScriptCoreData.EqualFlag){
                         for (int i = 0 ; i <= JumpPointCounter ; i ++){
-                            if (JumpPoints[i].Name == ReadValue(Instruction, 5 , 8)){
+                            if (JumpPoints[i].Name == SplitValue(Instruction, 1)){
                                 ParasiteScriptCoreData.ReturnLine = ParasiteScriptCoreData.LineCounter;
                                 ParasiteScriptCoreData.LineCounter = JumpPoints[i].LineNumber;
                                 ParasiteScriptCoreData.EqualFlag = false;
@@ -663,7 +697,7 @@ auto CycleInstruction(){
                 if (SplitValue(Instruction, 0 ) == "jifg"){  
                     if(ParasiteScriptCoreData.GreaterFlag){
                         for (int i = 0 ; i <= JumpPointCounter ; i ++){
-                            if (JumpPoints[i].Name == ReadValue(Instruction, 5 , 8)){
+                            if (JumpPoints[i].Name == SplitValue(Instruction, 1)){
                                 ParasiteScriptCoreData.ReturnLine = ParasiteScriptCoreData.LineCounter;
                                 ParasiteScriptCoreData.LineCounter = JumpPoints[i].LineNumber;
                                 ParasiteScriptCoreData.LesserFlag = false;
@@ -675,7 +709,7 @@ auto CycleInstruction(){
                 if (SplitValue(Instruction, 0 ) == "jifl"){  
                     if(ParasiteScriptCoreData.LesserFlag){
                         for (int i = 0 ; i <= JumpPointCounter ; i ++){
-                            if (JumpPoints[i].Name == ReadValue(Instruction, 5 , 8)){
+                            if (JumpPoints[i].Name == SplitValue(Instruction, 1)){
                                 ParasiteScriptCoreData.ReturnLine = ParasiteScriptCoreData.LineCounter;
                                 ParasiteScriptCoreData.LineCounter = JumpPoints[i].LineNumber;
                                 ParasiteScriptCoreData.LesserFlag = false;
@@ -723,76 +757,75 @@ auto CycleInstruction(){
                         InpValue = 7;
                     }
                     
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            VaribleMemory[i].IValue = InpValue;
-                        }
-                    }
+                    StoreIntToMemory(SplitValue(Instruction, 1 ) , InpValue);
                 }
 
                 if (SplitValue(Instruction, 0 ) == "drawspr"){   
                     int X = 0;
                     int Y = 0;
-                    int Scale = 1;
-                    int Size = 16;
+                    int Scale = 0;
+                    int Size = 0;
 
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 2 )){
-                            X = VaribleMemory[i].IValue;
-                        }
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 3 )){
-                            Y = VaribleMemory[i].IValue;
-                        }
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 4 )){
-                            Scale = VaribleMemory[i].IValue;
-                        }
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 5 )){
-                            Size = VaribleMemory[i].IValue;
-
-                        }
+                    if (IsNumber(SplitValue(Instruction, 2 ))){
+                        X = StringToInt(SplitValue(Instruction, 2 ));
                     }
+                    else {X = PullIntFromMemory(SplitValue(Instruction, 2 ));}
 
-                    for (int i = 0 ; i <= VaribleCounter; i++){
-                        if (VaribleMemory[i].Name == SplitValue(Instruction, 1 )){
-                            for (int x = 0 ; x <= Size - 1 ; x ++){
-                                for (int y = 0 ; y <= Size - 1 ; y ++){
-                                    switch(VaribleMemory[i].Value[y * Size + x]){
-                                        case L'0':
-                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDBlue);
-                                            break;
-                                        case L'1':
-                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLBlue);
-                                            break;
-                                        case L'2':
-                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDRed);
-                                            break;
-                                        case L'3':
-                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLRed);
-                                            break;
-                                        case L'4':
-                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDYellow);
-                                            break;
-                                        case L'5':
-                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLYellow);
-                                            break;
-                                        case L'6':
-                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDPurple);
-                                            break;
-                                        case L'7':
-                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLPurple);
-                                            break;
-                                        case L'8':
-                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDGreen);
-                                            break;
-                                        case L'9':
-                                            DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLGreen);
-                                            break;
-                                    }
-                                }
+                    if (IsNumber(SplitValue(Instruction, 3 ))){
+                        Y = StringToInt(SplitValue(Instruction, 3 ));
+                    }
+                    else {Y = PullIntFromMemory(SplitValue(Instruction, 3 ));}
+
+                    if (IsNumber(SplitValue(Instruction, 4 ))){
+                        Scale = StringToInt(SplitValue(Instruction, 4 ));
+                    }
+                    else {Scale = PullIntFromMemory(SplitValue(Instruction, 4 ));}
+
+                    if (IsNumber(SplitValue(Instruction, 5 ))){
+                        Size = StringToInt(SplitValue(Instruction, 5 ));
+                    }
+                    else {Size = PullIntFromMemory(SplitValue(Instruction, 5 ));}
+
+                    for (int x = 0 ; x <= Size - 1 ; x ++){
+                        for (int y = 0 ; y <= Size - 1 ; y ++){
+                            switch(PullStrFromMemory(SplitValue(Instruction, 1))[y * Size + x]){
+                                case L'0':
+                                    DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDBlue);
+                                    break;
+                                case L'1':
+                                    DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLBlue);
+                                    break;
+                                case L'2':
+                                    DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDRed);
+                                    break;
+                                case L'3':
+                                    DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLRed);
+                                    break;
+                                case L'4':
+                                    DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDYellow);
+                                    break;
+                                case L'5':
+                                    DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLYellow);
+                                    break;
+                                case L'6':
+                                    DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDPurple);
+                                    break;
+                                case L'7':
+                                    DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLPurple);
+                                    break;
+                                case L'8':
+                                    DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PDGreen);
+                                    break;
+                                case L'9':
+                                    DrawRectangle( ((x * Scale) + X) * DisplayScale, ((y * Scale) + Y )* DisplayScale , Scale * DisplayScale ,Scale * DisplayScale , PLGreen);
+                                    break;
                             }
                         }
                     }
+                }
             }
+            
+
         }
     }
 }

@@ -44,15 +44,15 @@ jumpl Main
 :RunCursorLogic
     wipe 
 
-    setv Temp1 CursorY
+    set Temp1 CursorY
     div Temp1 48
 
     mul Temp1 3
 
-    setv Temp2 CursorX
+    set Temp2 CursorX
     div Temp2 48
 
-    addv Temp1 Temp2
+    add Temp1 Temp2
 
     arrset Board Temp1 Key
 
@@ -110,63 +110,63 @@ jumpl Main
 :DrawBoard
     wipe
     arrload Board 0 Temp
-    cmpvi Temp 1
+    cmp Temp 1
     jife DX0
     jifg DO0
     jifl DB0
 
     wipe
     arrload Board 1 Temp
-    cmpvi Temp 1
+    cmp Temp 1
     jife DX1
     jifg DO1
     jifl DB1
 
     wipe
     arrload Board 2 Temp
-    cmpvi Temp 1
+    cmp Temp 1
     jife DX2
     jifg DO2
     jifl DB2
 
     wipe
     arrload Board 3 Temp
-    cmpvi Temp 1
+    cmp Temp 1
     jife DX3
     jifg DO3
     jifl DB3
 
     wipe
     arrload Board 4 Temp
-    cmpvi Temp 1
+    cmp Temp 1
     jife DX4
     jifg DO4
     jifl DB4
 
     wipe
     arrload Board 5 Temp
-    cmpvi Temp 1
+    cmp Temp 1
     jife DX5
     jifg DO5
     jifl DB5
 
     wipe
     arrload Board 6 Temp
-    cmpvi Temp 1
+    cmp Temp 1
     jife DX6
     jifg DO6
     jifl DB6
 
     wipe
     arrload Board 7 Temp
-    cmpvi Temp 1
+    cmp Temp 1
     jife DX7
     jifg DO7
     jifl DB7
 
     wipe
     arrload Board 8 Temp
-    cmpvi Temp 1
+    cmp Temp 1
     jife DX8
     jifg DO8
     jifl DB8
@@ -174,25 +174,25 @@ jumpl Main
     drawspr Cursor CursorX CursorY CursorScale SpriteSizes
     wipe
     pullinp Input
-    cmpvi Input 1
+    cmp Input 1
     jife Up00
-    cmpvi Input 2
+    cmp Input 2
     jife Right
-    cmpvi Input 3
+    cmp Input 3
     jife Down
-    cmpvi Input 4
+    cmp Input 4
     jife Left
 
     wipe
-    cmpvi Input 6
+    cmp Input 6
     jife A000
 
     wipe
-    cmpvi Input 7
+    cmp Input 7
     jife S000
 
     wipe
-    cmpvi Input 5
+    cmp Input 5
     jife ResetBoard
 
     wipe

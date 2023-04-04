@@ -1,5 +1,5 @@
-
-**PPG System v.1.1.0 *- Release Notes***
+﻿
+**PPG System v.1.2.0 *- Release Notes***
 ----
 Description 
 
@@ -48,53 +48,43 @@ Limitations of PPG System / Specifications
 		 jump 18  # Goes to Line 18
 		 jumpl Main # Goes to Label "Main"
 		 
-	 addv { Destination } {}  # Adds two Varibles 
-	 add { Destination } []  # Adds Integer to Varible
+	 add { Destination } [] or {}  # Adds Integer to Varible or Adds Two Varibles
 	 
 	 Example :
-		 addv MyVarible1 MyVarible2  # MyVarible1 = MyVarible1 + MyVarible2
+		 add MyVarible1 MyVarible2  # MyVarible1 = MyVarible1 + MyVarible2
 		 add MyVarible1 18   # MyVarible1 = MyVarible1 + 18
 		 
-	 subv { Destination } {}  # Subtracts two Varibles 
-	 sub { Destination } []  # Subtracts Integer from Varible
+	 sub { Destination } [] or {}  # Subtracts Integer from Varible or Subtracts two Varibles
 	 
 	 Example :
-		 subv MyVarible1 MyVarible2  # MyVarible1 = MyVarible1 - MyVarible2
+		 sub MyVarible1 MyVarible2  # MyVarible1 = MyVarible1 - MyVarible2
 		 sub MyVarible1 18   # MyVarible1 = MyVarible1 - 18
 		 
-	 mulv { Destination } {}  # Multiplies two Varibles 
-	 mul { Destination } []  # Multiplies Varible by Integer
+	 mul { Destination } [] or {}  # Multiplies Varible by Integer or  Multiplies two Varibles
 
 	 Example :
-		 mulv MyVarible1 MyVarible2  # MyVarible1 = MyVarible1 * MyVarible2
+		 mul MyVarible1 MyVarible2  # MyVarible1 = MyVarible1 * MyVarible2
 		 mul MyVarible1 18   # MyVarible1 = MyVarible1 * 18
 	 
-	 divv { Destination } {}  # Divides two Varibles 
-	 div { Destination } []  # Divides Varible by Integer
+	 div { Destination } [] or {} # Divides Varible by Integer or  Divides two Varibles 
 	 
 	 Example :
 		 divv MyVarible1 MyVarible2  # MyVarible1 = MyVarible1 / MyVarible2
 		 div MyVarible1 18   # MyVarible1 = MyVarible1 / 18
 	 
-	 set { Destination }  '' or []  # Sets Varible to a Int or Str Value
-	 setv { Destination }  {}  # Sets Varible Value to Another Varibles Value
+	 set { Destination }  {} or '' or [] # Sets Varible Value to Another Value
 
 	 Example :
 		 set MyVarible1 18  # MyVarible1 = 18
 		 set MyVarible1 'Hello World'  # MyVarible1 = 'Hello World'
-		 setv MyVarible1 MyVarible2  # MyVarible1 = MyVarible2
+		 set MyVarible1 MyVarible2  # MyVarible1 = MyVarible2
 	 
-	 settextsize []  # Sets Text Size
-	 
-	 Example :
-		 settextsize 20
 
-     cmpvv {} {}  # Compares Two Varibles
-     cmpvi {} []  # Compares Varible to Int
+     cmp {} {} or []  # Compares Two Things
 	 
 	 Example :
-		 cmpvv MyVarible1 MyVarible2 
-		 cmpvi MyVarible1 18
+		 cmp MyVarible1 MyVarible2 
+		 cmp MyVarible1 18
 	
 	 jifne ||  # Jump to Label if cmp was Not Equal
 	 jife ||  # Jump to Label if cmp was Equal 
@@ -102,7 +92,7 @@ Limitations of PPG System / Specifications
 	 jifl ||  # Jump to Label if cmp was Lesser
 	
 	 Example :
-		 cmpvi MyVarible 22  # Get Result
+		 cmp MyVarible 22  # Get Result
 		 jifne MyLabel1 # if Equal go to MyLabel1
 		 jife MyLabel2 # if Not Equal go to MyLabel2
 		 jifg MyLabel3 # if Greater go to MyLabel3
@@ -121,7 +111,7 @@ Limitations of PPG System / Specifications
 	  Example :
 		  pullinp MyVarible  # MyVarible = KeyInput
 
-	  drawspr ^ {X} {Y} {Scale} {Original Size in Pixels} # Draws Sprite
+	  drawspr ^ {X} or [] {Y} or [] {Scale} or [] {Original Size in Pixels} or [] # Draws Sprite
 	  
 	  Example :
 		  spr ExampleSprite '+++++00+++++++++++++0770++00+++++000076600770+++07706066667660++06666666606660++066600666666660++06676000066660++07666666666660+067776666607666006777666666006600666776666666660+966776666666660++9966669966669+++++9999++9999+++++++++++++++++++++++++++++++++++'
@@ -132,6 +122,7 @@ Limitations of PPG System / Specifications
 		  
 		  :Main
 		      drawspr ExampleSprite SpriteX SpriteY SpriteScale SpriteSize
+		      drawspr ExampleSprite 0 0 2 8
 		      jumpl Main
 		      
 	  arrset ** {Index Varible} or [] {Number Varible} or []  # Sets Data in an Array to a Number or Varible 
@@ -152,12 +143,34 @@ Limitations of PPG System / Specifications
 		  arrload MyArray Index ArrayData  # ArrayData = MyArray[0] or MyArray[Index}
 		  arrwipe MyArray 0
 	   
-	   clear  # Clears Screen
+	   clear  # Clears Screen to Black
 	   delay []  # Delays Number of Frames
-	   pspeed []  # Sets Speed of PPGSystem Processor , or Instructions Per Frame 
+	   pspeed [] or {} # Sets Speed of PPGSystem Processor , or Instructions Per Frame 
 		  
 		  
 		  
+---
+**Logic** 
+
+		 This Is A New Feature :)
+		 
+		 if , else
+		 
+		 Operators = ( == , != , >= , <= , < , > )
+		 
+		 Syntax: if Value OPERATOR Value
+		 
+		 
+		 Syntax Example:
+			 if MyVarible == 1
+			 
+				 // Do This
+				 
+			 end
+			 else
+				 // Do This
+			 end
+			
 ___
 **Data Types**
 ___

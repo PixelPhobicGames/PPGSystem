@@ -1,0 +1,110 @@
+
+// Game to Test New Logical Instructions
+
+// Enjoy :)
+
+spr Background '888888888888888888988988889888589888888888889988888898888888888888888888858898885588888588888888888888998889888888898888888888888988888888898888888888888988888898888885888888888888985889888888858888888888888588888988888888888889888888888988899888888888888888888888888889888888888888888888888888988889888888988888888888888988+'
+
+spr PlayerSprite '++++22+++2+2112+++21112++31121132231113+2223332+22222222+3222223'
+spr PlayerBack '+++222+++++222+2+222222++22222222222222+2222222+22222222+3222223'
+
+var PlayerX 0
+var PlayerY 0
+var Input 0
+var Direction 0
+var Velocity 0
+
+var Temp1 0
+var Temp2 0
+
+pspeed 100
+
+:Main
+    clear 
+
+    drawspr Background 0 0 20 18
+
+    if Direction == 3
+        drawspr PlayerSprite PlayerX PlayerY 6 8
+    end
+    else 
+        drawspr PlayerBack PlayerX PlayerY 6 8
+    end
+
+    pullinp Input
+
+    jumpl UpdateInputs
+    jumpl SetBounds
+    
+    jumpl Main
+
+:SetBounds
+    if PlayerY < 0
+        set PlayerY 0
+    end
+
+    if PlayerY > 192
+        set PlayerY 192
+    end
+
+    if PlayerX < 0
+        set PlayerX 0
+    end
+
+    if PlayerX > 272
+        set PlayerX 272
+    end
+
+    ret
+
+
+:UpdateInputs
+
+    if Input == 2
+        add Velocity 1
+        set Direction 2
+    end
+
+    if Input == 4
+        add Velocity 1
+        set Direction 4
+    end
+
+    if Input == 1
+        add Velocity 1
+        set Direction 1
+    end
+
+    if Input == 3
+        add Velocity 1
+        set Direction 3
+    end
+
+    if Input == 0
+        sub Velocity 1
+    end
+
+    if Velocity >= 30
+        set Velocity 30
+    end
+
+    set Temp1 Velocity 
+    div Temp1 10
+
+    if Direction == 2
+        add PlayerX Temp1
+    end
+
+    if Direction == 4
+        sub PlayerX Temp1
+    end
+
+    if Direction == 1
+        sub PlayerY Temp1
+    end
+
+    if Direction == 3
+        add PlayerY Temp1
+    end
+    
+    ret
