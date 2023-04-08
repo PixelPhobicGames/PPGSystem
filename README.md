@@ -1,5 +1,5 @@
 ﻿
-**PPG System v.1.2.0 *- Release Notes***
+**PPG System v.1.3.0 *- Release Notes***
 ----
 Description 
 
@@ -144,6 +144,7 @@ Limitations of PPG System / Specifications
 		  arrwipe MyArray 0
 	   
 	   clear  # Clears Screen to Black
+	   vrefresh # Refreshes Display
 	   delay []  # Delays Number of Frames
 	   pspeed [] or {} # Sets Speed of PPGSystem Processor , or Instructions Per Frame 
 		  
@@ -170,6 +171,46 @@ Limitations of PPG System / Specifications
 			 else
 				 // Do This
 			 end
+---
+**Macro Expressions**
+
+			  These Were Added For Ease of Life
+			  
+			  Alternitives For add , sub , mul , div 
+			  
+			  Macro Expressions
+___
+			  - 
+			  +
+			  /
+			  *
+___
+			  // Note - Behaves Like C++
+			  +=
+			  -=
+			  *=
+			  /=
+___
+			  
+			 
+			  Examples:
+				  var MyVarible 0
+				  MyVarible = 0
+				  // 0
+				  MyVarible = 1 + 2 
+				  // 3
+				  MyVarible += 1
+				  // 4
+				  MyVarible -= 1
+				  // 3
+				  
+				 
+				  if MyVarible == 4 - 1
+					 // Do Something
+				  end
+				 
+
+
 			
 ___
 **Data Types**
@@ -203,7 +244,7 @@ ___
 
 	 END  # Kill Program
 	 CLS  # Clear Screen
-	 SEI  # Launch Sprite Editor
+	 SEI  # Launch Sprite Editor, Must Type  RUN after.
 	 LOAD  # Load Program From "Apps/" Folder
 	 RUN  # Run Program 
 	 
@@ -221,7 +262,10 @@ ___
  - F1 To Decrease Window Scale
  - F2 To Increase Window Scale
  - Running Program With a -D Flag Will Turn on Debug Mode
- - Running Program With a -Ds Flag Will Show Instructions Per Second at the Bottom
+ - Running Program With a -Ds Flag Will Show Instructions Per Second at the 
+ Bottom
+ -Running Program With a -s Flag Will Run Program In Step Mode , Aka it Will Run **Very Very Slow** for Debugging Purposes
+ - ***Be Very Very Careful With Usage of Spaces in Parasite, It is Very Space Sensitive, Avoid Double Spaces and not Using Spaces to Separate Arguments.***
 
 Thank You :)
 
