@@ -25,6 +25,7 @@ class System{
 
 static System PPGSystem;
 
+static bool StepMode = false;
 static bool DisplaySpeed = false;
 static bool TerminalRunning = true;
 static bool SpriteEditorRunning = false;

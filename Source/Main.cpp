@@ -28,16 +28,26 @@ int main(int argc, char *argv[])
             if (Argument == "-Ds"){
                 DisplaySpeed = true;
             }
+            if (Argument == "-s"){
+                StepMode = true;
+            }
+
         }
     }
 
     while (!WindowShouldClose())
     {
-        BeginDrawing();
         if (TimeDelay == 0){
-            for (int T = 0 ; T <= InstructionsPerTick ; T++){
+            if (StepMode == true){
                 CycleInstruction();
                 ParasiteScriptCoreData.LineCounter += 1;
+                TimeDelay = 30000000;
+            }
+            else {
+                for (int T = 0 ; T <= InstructionsPerTick ; T++){
+                    CycleInstruction();
+                    ParasiteScriptCoreData.LineCounter += 1;
+                }
             }
         }
         else {
@@ -55,7 +65,6 @@ int main(int argc, char *argv[])
             SetWindowSize(320 * DisplayScale, 240 * DisplayScale);
         }
 
-        EndDrawing();
     }
 
     if (Debug)cout << "\033[0;37m";

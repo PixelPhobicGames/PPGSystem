@@ -31,6 +31,7 @@ void ParasiteScriptInit(){ // Resets all Flags
 
     ParasiteScriptCoreData.CompareFlag = false;
     ParasiteScriptCoreData.ContinueFlag = true;
+    ParasiteScriptCoreData.ErrorFlag = false;
 
     ParasiteScriptCoreData.ReturnLine = 0;
     ParasiteScriptCoreData.Line[0] = '\0';
@@ -180,6 +181,7 @@ auto PullIntFromMemory(string VaribleName){
     }
     if (!Found){
         cout << "Error Varible Not Declared: " << VaribleName << "\n";
+        ParasiteScriptCoreData.ErrorFlag = true;
     }
 }
 auto PullStrFromMemory(string VaribleName){
@@ -190,9 +192,11 @@ auto PullStrFromMemory(string VaribleName){
     }
 }
 auto StoreIntToMemory(string VaribleName, int Value){
-    for (int x = 0 ; x <= VaribleCounter; x++){
-        if (VaribleMemory[x].Name == VaribleName){
-            VaribleMemory[x].IValue = Value;
+    if (ScanVaribleMemory(VaribleName)){
+        for (int x = 0 ; x <= VaribleCounter; x++){
+            if (VaribleMemory[x].Name == VaribleName){
+                VaribleMemory[x].IValue = Value;
+            }
         }
     }
 }
@@ -218,30 +222,43 @@ string RemoveSpaces(string Data)
     return OutData;
 }
 
+int ScanSpaces(string Data){
+    int Spaces = 0;
+
+    for (int i = 0 ; i <= Data.size() ; i ++){
+        if (Data[i] != ' '){
+            Spaces ++;
+        }
+    }
+
+    return Spaces;
+}
+
 void LoadScript(const char *ScriptPath){ // Loads Script
     istringstream ProgramData(ParasiteScriptLoadFile(ScriptPath));
     string CurrentLine;
 
     while (getline(ProgramData, CurrentLine)) {
-
-        if (ReadValue(CurrentLine, 0 , 0) == ":"){            
-            JumpPoints[JumpPointCounter].Name = ReadValue(CurrentLine, 1 , CurrentLine.size() - 1);
-            JumpPoints[JumpPointCounter].LineNumber = ParasiteScriptCoreData.LineCounter;
-            JumpPointCounter ++;
-        }
-        if (ReadValue(CurrentLine, 0 , 0) == " "){
-            int SpaceCounter = 0;
-            for (int i = 0 ; i <= CurrentLine.size() ; i ++){
-                if (ReadValue(CurrentLine, i , i) == " ")SpaceCounter ++;
-                else {
-                    break;
-                }
+        if (!CurrentLine.empty()){
+            if (ReadValue(CurrentLine, 0 , 0) == ":"){            
+                JumpPoints[JumpPointCounter].Name = ReadValue(CurrentLine, 1 , CurrentLine.size() - 1);
+                JumpPoints[JumpPointCounter].LineNumber = ParasiteScriptCoreData.LineCounter;
+                JumpPointCounter ++;
             }
-            string Temp = ReadValue(CurrentLine, SpaceCounter , CurrentLine.size() - 1);
-            CurrentLine = Temp;
+            if (ReadValue(CurrentLine, 0 , 0) == " "){
+                int SpaceCounter = 0;
+                for (int i = 0 ; i <= CurrentLine.size() ; i ++){
+                    if (ReadValue(CurrentLine, i , i) == " ")SpaceCounter ++;
+                    else {
+                        break;
+                    }
+                }
+                string Temp = ReadValue(CurrentLine, SpaceCounter , CurrentLine.size() - 1);
+                CurrentLine = Temp;
+            }
+            ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] = CurrentLine;
+            ParasiteScriptCoreData.LineCounter ++;
         }
-        ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] = CurrentLine;
-        ParasiteScriptCoreData.LineCounter ++;
 
     } 
     ParasiteScriptCoreData.ProgramSize = ParasiteScriptCoreData.LineCounter;
@@ -260,21 +277,355 @@ bool IsNumber(const string& s)
     return true;
  }
 
+
 static int InstructionsPerTick = 32;
 static int TimeDelay = 0;
 
 auto CycleInstruction(){
     if (TimeDelay == 0){
         if (ParasiteScriptCoreData.LineCounter != ParasiteScriptCoreData.ProgramSize){
+
+            bool FoundInstruction = false;
             
             string Instruction = ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter];
 
+            if (ParasiteScriptCoreData.ErrorFlag){
+                cout << "Error Command: -->" << ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter - 1] << "<--\n";
+                //exit(0);
+            }
+
             if (SplitValue(Instruction, 0 ) == "end"){
+                FoundInstruction = true;
                 ParasiteScriptCoreData.ContinueFlag = true;
             }
 
-            if (ParasiteScriptCoreData.ContinueFlag){
+            if (ParasiteScriptCoreData.ContinueFlag && SplitValue(Instruction, 0) != "//"){
+                for (int i = 0 ; i <= ScanSpaces(Instruction); i ++){
+                    if (SplitValue(Instruction, i) == "+"){
+                        string Part1 = "";
+                        string Part2 = "";
+                        bool Found = false;
+                        int SpaceCounter = 0 ;
+                        if (!IsNumber(SplitValue(Instruction, i-1))){
+                            if (IsNumber(SplitValue(Instruction, i+1))){
+                                int Value = StringToInt(SplitValue(Instruction, i+1));
+                                int Value1 = PullIntFromMemory(SplitValue(Instruction, i-1));
+                                StoreIntToMemory(SplitValue(Instruction, i-1) , Value1 + Value);
+                            }
+                            else{
+                                int Value = PullIntFromMemory(SplitValue(Instruction, i+1));
+                                StoreIntToMemory(SplitValue(Instruction, i-1) , PullIntFromMemory(SplitValue(Instruction, i-1)) + Value);
+                            }
+
+                            for (int i = 0 ; i <= Instruction.size(); i++){
+                                if (Instruction[i] == '+'){
+                                    Part1 = ReadValue(Instruction , 0 , i - 1);
+                                    Found = true;
+                                }
+                                if (Found){
+                                    if (Instruction[i] == ' '){
+                                        SpaceCounter ++;
+                                        if (SpaceCounter == 2){
+                                            Part2 = ReadValue(Instruction , i + 1, Instruction.size() - 1);
+                                            Part2 += " ";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            int Value = StringToInt(SplitValue(Instruction, i-1)) + StringToInt(SplitValue(Instruction, i+1));
+
+                            for (int i = 0 ; i <= Instruction.size(); i++){
+                                if (Instruction[i] == '+'){
+                                    Part1 = ReadValue(Instruction , 0 , i - 3);
+                                    stringstream ss;
+                                    ss << Value;
+                                    Part1 += ss.str();
+                                    Part1 += " ";
+                                    Found = true;
+                                }
+                                if (Found){
+                                    if (Instruction[i] == ' '){
+                                        SpaceCounter ++;
+                                        if (SpaceCounter == 2){
+                                            Part2 = ReadValue(Instruction , i + 1, Instruction.size());
+                                            Part2 += " ";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    
+                        Instruction = '\0';
+                        Instruction = Part1 + Part2;
+                        ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] = Instruction;
+                         
+                    }
+                    if (SplitValue(Instruction, i) == "-"){
+                        string Part1 = "";
+                        string Part2 = "";
+                        bool Found = false;
+                        int SpaceCounter = 0 ;
+                        if (!IsNumber(SplitValue(Instruction, i-1))){
+                            if (IsNumber(SplitValue(Instruction, i+1))){
+                                int Value = StringToInt(SplitValue(Instruction, i+1));
+                                int Value1 = PullIntFromMemory(SplitValue(Instruction, i-1));
+                                StoreIntToMemory(SplitValue(Instruction, i-1) , Value1 - Value);
+                            }
+                            else{
+                                int Value = PullIntFromMemory(SplitValue(Instruction, i+1));
+                                StoreIntToMemory(SplitValue(Instruction, i-1) , PullIntFromMemory(SplitValue(Instruction, i-1)) - Value);
+                            }
+
+                            for (int i = 0 ; i <= Instruction.size(); i++){
+                                if (Instruction[i] == '-'){
+                                    Part1 = ReadValue(Instruction , 0 , i - 1);
+                                    Found = true;
+                                }
+                                if (Found){
+                                    if (Instruction[i] == ' '){
+                                        SpaceCounter ++;
+                                        if (SpaceCounter == 2){
+                                            Part2 = ReadValue(Instruction , i + 1, Instruction.size() - 1);
+                                            Part2 += " ";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            int Value = StringToInt(SplitValue(Instruction, i-1)) - StringToInt(SplitValue(Instruction, i+1));
+
+                            for (int i = 0 ; i <= Instruction.size(); i++){
+                                if (Instruction[i] == '-'){
+                                    Part1 = ReadValue(Instruction , 0 , i - 3);
+                                    stringstream ss;
+                                    ss << Value;
+                                    Part1 += ss.str();
+                                    Part1 += " ";
+                                    Found = true;
+                                }
+                                if (Found){
+                                    if (Instruction[i] == ' '){
+                                        SpaceCounter ++;
+                                        if (SpaceCounter == 2){
+                                            Part2 = ReadValue(Instruction , i + 1, Instruction.size());
+                                            Part2 += " ";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    
+                        Instruction = '\0';
+                        Instruction = Part1 + Part2;
+                        ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] = Instruction;
+                    }
+
+                    if (SplitValue(Instruction, i) == "*"){
+                        string Part1 = "";
+                        string Part2 = "";
+                        bool Found = false;
+                        int SpaceCounter = 0 ;
+                        if (!IsNumber(SplitValue(Instruction, i-1))){
+                            if (IsNumber(SplitValue(Instruction, i+1))){
+                                int Value = StringToInt(SplitValue(Instruction, i+1));
+                                int Value1 = PullIntFromMemory(SplitValue(Instruction, i-1));
+                                StoreIntToMemory(SplitValue(Instruction, i-1) , Value1 * Value);
+                            }
+                            else{
+                                int Value = PullIntFromMemory(SplitValue(Instruction, i+1));
+                                StoreIntToMemory(SplitValue(Instruction, i-1) , PullIntFromMemory(SplitValue(Instruction, i-1)) * Value);
+                            }
+
+                            for (int i = 0 ; i <= Instruction.size(); i++){
+                                if (Instruction[i] == '*'){
+                                    Part1 = ReadValue(Instruction , 0 , i - 1);
+                                    Found = true;
+                                }
+                                if (Found){
+                                    if (Instruction[i] == ' '){
+                                        SpaceCounter ++;
+                                        if (SpaceCounter == 2){
+                                            Part2 = ReadValue(Instruction , i + 1, Instruction.size() - 1);
+                                            Part2 += " ";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            int Value = StringToInt(SplitValue(Instruction, i-1)) * StringToInt(SplitValue(Instruction, i+1));
+
+                            for (int i = 0 ; i <= Instruction.size(); i++){
+                                if (Instruction[i] == '*'){
+                                    Part1 = ReadValue(Instruction , 0 , i - 3);
+                                    stringstream ss;
+                                    ss << Value;
+                                    Part1 += ss.str();
+                                    Part1 += " ";
+                                    cout << Part1 << "\n";
+                                    Found = true;
+                                }
+                                if (Found){
+                                    if (Instruction[i] == ' '){
+                                        SpaceCounter ++;
+                                        if (SpaceCounter == 2){
+                                            Part2 = ReadValue(Instruction , i + 1, Instruction.size());
+                                            Part2 += " ";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    
+                        Instruction = '\0';
+                        Instruction = Part1 + Part2;
+                        ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] = Instruction;
+                         
+                    }
+
+                    if (SplitValue(Instruction, i) == "/"){
+                        string Part1 = "";
+                        string Part2 = "";
+                        bool Found = false;
+                        int SpaceCounter = 0 ;
+                        if (!IsNumber(SplitValue(Instruction, i-1))){
+                            if (IsNumber(SplitValue(Instruction, i+1))){
+                                int Value = StringToInt(SplitValue(Instruction, i+1));
+                                int Value1 = PullIntFromMemory(SplitValue(Instruction, i-1));
+                                StoreIntToMemory(SplitValue(Instruction, i-1) , Value1 / Value);
+                            }
+                            else{
+                                int Value = PullIntFromMemory(SplitValue(Instruction, i+1));
+                                StoreIntToMemory(SplitValue(Instruction, i-1) , PullIntFromMemory(SplitValue(Instruction, i-1)) / Value);
+                            }
+
+                            for (int i = 0 ; i <= Instruction.size(); i++){
+                                if (Instruction[i] == '/'){
+                                    Part1 = ReadValue(Instruction , 0 , i - 1);
+                                    Found = true;
+                                }
+                                if (Found){
+                                    if (Instruction[i] == ' '){
+                                        SpaceCounter ++;
+                                        if (SpaceCounter == 2){
+                                            Part2 = ReadValue(Instruction , i + 1, Instruction.size() - 1);
+                                            Part2 += " ";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else {
+                            int Value = StringToInt(SplitValue(Instruction, i-1)) / StringToInt(SplitValue(Instruction, i+1));
+
+                            for (int i = 0 ; i <= Instruction.size(); i++){
+                                if (Instruction[i] == '/'){
+                                    Part1 = ReadValue(Instruction , 0 , i - 3);
+                                    stringstream ss;
+                                    ss << Value;
+                                    Part1 += ss.str();
+                                    Part1 += " ";
+                                    cout << Part1 << "\n";
+                                    Found = true;
+                                }
+                                if (Found){
+                                    if (Instruction[i] == ' '){
+                                        SpaceCounter ++;
+                                        if (SpaceCounter == 2){
+                                            Part2 = ReadValue(Instruction , i + 1, Instruction.size());
+                                            Part2 += " ";
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    
+                        Instruction = '\0';
+                        Instruction = Part1 + Part2;
+                        ParasiteScriptCoreData.Line[ParasiteScriptCoreData.LineCounter] = Instruction;
+                         
+                    }
+                }
+
+                if (SplitValue(Instruction, 1) == "="){
+                    FoundInstruction = true;
+                    if (IsNumber(SplitValue(Instruction, 2))){
+                        StoreIntToMemory(SplitValue(Instruction, 0) , StringToInt(SplitValue(Instruction, 2)));
+                        if (Debug)cout << "set: " << StringToInt(SplitValue(Instruction, 2)) << "\n";
+                    }
+                    else {
+                        int Value = PullIntFromMemory(SplitValue(Instruction, 2));
+                        StoreIntToMemory(SplitValue(Instruction, 0) , Value);
+                        if (Debug)cout << "set: " << Value << "\n";
+                    }
+                }
+
+                if (SplitValue(Instruction, 1) == "+="){
+                    FoundInstruction = true;
+                    if (IsNumber(SplitValue(Instruction, 2))){
+                        int Value = StringToInt(SplitValue(Instruction, 2));
+                        StoreIntToMemory(SplitValue(Instruction, 0) , PullIntFromMemory(SplitValue(Instruction, 0)) + Value);
+
+                        if (Debug)cout << "add: " << PullIntFromMemory(SplitValue(Instruction, 0))+ Value << "\n";
+                    }
+                    else{
+                        int Value = PullIntFromMemory(SplitValue(Instruction, 2));
+                        StoreIntToMemory(SplitValue(Instruction, 0) , PullIntFromMemory(SplitValue(Instruction, 0)) + Value);
+                        if (Debug)cout << "add: " << PullIntFromMemory(SplitValue(Instruction, 0))+ Value << "\n";
+                    }
+                }
+
+                if (SplitValue(Instruction, 1) == "-="){
+                    FoundInstruction = true;
+                    if (IsNumber(SplitValue(Instruction, 2))){
+                        int Value = StringToInt(SplitValue(Instruction, 2));
+                        StoreIntToMemory(SplitValue(Instruction, 0) , PullIntFromMemory(SplitValue(Instruction, 0)) - Value);
+                        if (Debug)cout << "sub: " << PullIntFromMemory(SplitValue(Instruction, 0)) - Value << "\n";
+                    }
+                    else{
+                        int Value = PullIntFromMemory(SplitValue(Instruction, 2));
+                        StoreIntToMemory(SplitValue(Instruction, 0) , PullIntFromMemory(SplitValue(Instruction, 0)) - Value);
+                        if (Debug)cout << "sub: " << PullIntFromMemory(SplitValue(Instruction, 0)) - Value << "\n";
+                    }
+                }
+
+                if (SplitValue(Instruction, 1) == "*="){
+                    FoundInstruction = true;
+                    if (IsNumber(SplitValue(Instruction, 2))){
+                        int Value = StringToInt(SplitValue(Instruction, 2));
+                        StoreIntToMemory(SplitValue(Instruction, 0) , PullIntFromMemory(SplitValue(Instruction, 0)) * Value);
+                        if (Debug)cout << "mul: " << PullIntFromMemory(SplitValue(Instruction, 0)) * Value << "\n";
+                    }
+                    else{
+                        int Value = PullIntFromMemory(SplitValue(Instruction, 2));
+                        StoreIntToMemory(SplitValue(Instruction, 0) , PullIntFromMemory(SplitValue(Instruction, 0)) * Value);
+                        if (Debug)cout << "mul: " << PullIntFromMemory(SplitValue(Instruction, 0)) * Value << "\n";
+                    }
+                }
+
+                if (SplitValue(Instruction, 1) == "/="){
+                    FoundInstruction = true;
+                    if (IsNumber(SplitValue(Instruction, 2))){
+                        int Value = StringToInt(SplitValue(Instruction, 2));
+                        StoreIntToMemory(SplitValue(Instruction, 0) , PullIntFromMemory(SplitValue(Instruction, 0)) / Value);
+                        if (Debug)cout << "div: " << PullIntFromMemory(SplitValue(Instruction, 0)) / Value << "\n";
+                    }
+                    else{
+                        int Value = PullIntFromMemory(SplitValue(Instruction, 2));
+                        StoreIntToMemory(SplitValue(Instruction, 0) , PullIntFromMemory(SplitValue(Instruction, 0)) / Value);
+                        if (Debug)cout << "div: " << PullIntFromMemory(SplitValue(Instruction, 0)) / Value << "\n";
+                    }
+                }
+
                 if (SplitValue(Instruction, 0 ) == "if"){
+                    FoundInstruction = true;
 
                     ParasiteScriptCoreData.ContinueFlag = true;
                     ParasiteScriptCoreData.ElseFlag = false;
@@ -348,7 +699,7 @@ auto CycleInstruction(){
                     }
 
                     if (Operator == "!="){
-                        if (Value1 >= Value2){
+                        if (Value1 != Value2){
                             ParasiteScriptCoreData.ContinueFlag = true;
                         }
                         else {
@@ -359,23 +710,33 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "else"){
+                    FoundInstruction = true;
                     if (!ParasiteScriptCoreData.ElseFlag){
                         ParasiteScriptCoreData.ContinueFlag = false;
                     }
                 }
 
                 if (SplitValue(Instruction, 0 ) == "stop"){
+                    FoundInstruction = true;
                     exit(0);
                 }
                 if (SplitValue(Instruction, 0 ) == "clear"){
+                    FoundInstruction = true;
+                    BeginDrawing();
                     ClearBackground(BLACK);
+                }
+                if (SplitValue(Instruction, 0 ) == "vrefresh"){
+                    FoundInstruction = true;
+                    EndDrawing();
                 }
 
                 if (SplitValue(Instruction, 0 ) == "delay"){
+                    FoundInstruction = true;
                     TimeDelay = StringToInt(SplitValue(Instruction, 1 ));
                 }
 
                 if (SplitValue(Instruction, 0 ) == "pspeed"){
+                    FoundInstruction = true;
                     if (IsNumber(SplitValue(Instruction, 1 ))){
                         InstructionsPerTick = StringToInt(SplitValue(Instruction, 1 ));
                     }
@@ -385,6 +746,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "arr"){
+                    FoundInstruction = true;
                     ArrayMemory[ArrayCounter].Name = SplitValue(Instruction, 1 );
                     if (Debug)cout << "Initializing New Array\n";
                     for (int i = 0 ; i <= MaxArraySize; i ++){
@@ -394,6 +756,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "arrwipe"){
+                    FoundInstruction = true;
 
                     for (int i = 0 ; i <= ArrayCounter; i++){
                         if (ArrayMemory[i].Name == SplitValue(Instruction, 1 )){
@@ -407,6 +770,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "arrload"){ // arrload TestArray 1 Varible
+                    FoundInstruction = true;
                     for (int i = 0 ; i <= ArrayCounter; i++){
                         if (ArrayMemory[i].Name == SplitValue(Instruction, 1 )){
 
@@ -436,6 +800,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "arrset"){ // arrset TestArray 1 Varible
+                    FoundInstruction = true;
                     for (int i = 0 ; i <= ArrayCounter; i++){
                         if (ArrayMemory[i].Name == SplitValue(Instruction, 1 )){
 
@@ -472,6 +837,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "var" || SplitValue(Instruction, 0 ) == "spr"){
+                    FoundInstruction = true;
                     VaribleMemory[VaribleCounter].Name = SplitValue(Instruction, 1 );
 
                     string VaribleData = SplitValue(Instruction, 2 );
@@ -510,6 +876,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "jumpl"){   
+                    FoundInstruction = true;
                     for (int i = 0 ; i <= JumpPointCounter ; i ++){
                         if (JumpPoints[i].Name == SplitValue(Instruction, 1)){
                             ParasiteScriptCoreData.ReturnLine = ParasiteScriptCoreData.LineCounter;
@@ -519,11 +886,13 @@ auto CycleInstruction(){
                 }
                 else {
                     if (SplitValue(Instruction, 0 ) == "jump"){   
+                        FoundInstruction = true;
                         ParasiteScriptCoreData.LineCounter = StringToInt(SplitValue(Instruction, 1 )) - 2;
                     }
                 }
 
                 if (SplitValue(Instruction, 0 ) == "add"){   
+                    FoundInstruction = true;
                     int Value1 = PullIntFromMemory(SplitValue(Instruction, 1));
                     int Value2 = 0;
 
@@ -540,6 +909,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "sub"){   
+                    FoundInstruction = true;
                     int Value1 = PullIntFromMemory(SplitValue(Instruction, 1));
                     int Value2 = 0;
 
@@ -556,6 +926,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "mul"){   
+                    FoundInstruction = true;
                     int Value1 = PullIntFromMemory(SplitValue(Instruction, 1));
                     int Value2 = 0;
 
@@ -572,6 +943,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "div"){   
+                    FoundInstruction = true;
                     int Value1 = PullIntFromMemory(SplitValue(Instruction, 1));
                     int Value2 = 0;
 
@@ -588,6 +960,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "set"){
+                    FoundInstruction = true;
                     if (!ScanVaribleMemory(SplitValue(Instruction, 2 ))){
                         string VaribleData = SplitValue(Instruction, 2 );
                         int VaribleType = 0;
@@ -629,6 +1002,7 @@ auto CycleInstruction(){
                 }
             
                 if (SplitValue(Instruction, 0 ) == "cmp"){   
+                    FoundInstruction = true;
                     ParasiteScriptCoreData.CompareFlag = true;
 
                     int V1IValue = PullIntFromMemory(SplitValue(Instruction, 1));
@@ -671,6 +1045,7 @@ auto CycleInstruction(){
                 }
 
                 if ( SplitValue(Instruction, 0 ) == "jifne"){  
+                    FoundInstruction = true;
                     if(ParasiteScriptCoreData.NotEqualFlag){
                         for (int i = 0 ; i <= JumpPointCounter ; i ++){
                             if (JumpPoints[i].Name == SplitValue(Instruction, 1)){
@@ -683,6 +1058,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "jife"){  
+                    FoundInstruction = true;
                     if(ParasiteScriptCoreData.EqualFlag){
                         for (int i = 0 ; i <= JumpPointCounter ; i ++){
                             if (JumpPoints[i].Name == SplitValue(Instruction, 1)){
@@ -695,6 +1071,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "jifg"){  
+                    FoundInstruction = true;
                     if(ParasiteScriptCoreData.GreaterFlag){
                         for (int i = 0 ; i <= JumpPointCounter ; i ++){
                             if (JumpPoints[i].Name == SplitValue(Instruction, 1)){
@@ -707,6 +1084,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "jifl"){  
+                    FoundInstruction = true;
                     if(ParasiteScriptCoreData.LesserFlag){
                         for (int i = 0 ; i <= JumpPointCounter ; i ++){
                             if (JumpPoints[i].Name == SplitValue(Instruction, 1)){
@@ -719,6 +1097,7 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "wipe"){  
+                    FoundInstruction = true;
                     ParasiteScriptCoreData.LesserFlag = false;
                     ParasiteScriptCoreData.GreaterFlag = false;
                     ParasiteScriptCoreData.EqualFlag = false;
@@ -726,41 +1105,85 @@ auto CycleInstruction(){
                 }
 
                 if (SplitValue(Instruction, 0 ) == "ret"){
+                    FoundInstruction = true;
                     if (Debug)cout << GreenText << "ret: Line " <<  ParasiteScriptCoreData.ReturnLine << "\n";
                     ParasiteScriptCoreData.LineCounter = ParasiteScriptCoreData.ReturnLine;
                 }
 
 
                 if (SplitValue(Instruction, 0 ) == "pullinp"){
+                    FoundInstruction = true;
 
                     int InpValue = 0;
 
-                    if (IsKeyDown(KEY_LEFT)){
-                        InpValue = 4;
+                    if (!IsGamepadAvailable(0)){
+                        if (IsKeyDown(KEY_LEFT)){
+                            InpValue = 4;
+                        }
+                        if (IsKeyDown(KEY_RIGHT)){
+                            InpValue = 2;
+                        }
+                        if (IsKeyDown(KEY_UP)){
+                            InpValue = 1;
+                        }
+                        if (IsKeyDown(KEY_DOWN)){
+                            InpValue = 3;
+                        }    
+                        if (IsKeyDown(KEY_SPACE)){
+                            InpValue = 5;
+                        }
+                        if (IsKeyDown(KEY_A)){
+                            InpValue = 6;
+                        }
+                        if (IsKeyDown(KEY_S)){
+                            InpValue = 7;
+                        }
                     }
-                    if (IsKeyDown(KEY_RIGHT)){
-                        InpValue = 2;
-                    }
-                    if (IsKeyDown(KEY_UP)){
-                        InpValue = 1;
-                    }
-                    if (IsKeyDown(KEY_DOWN)){
-                        InpValue = 3;
-                    }    
-                    if (IsKeyDown(KEY_SPACE)){
-                        InpValue = 5;
-                    }
-                    if (IsKeyDown(KEY_A)){
-                        InpValue = 6;
-                    }
-                    if (IsKeyDown(KEY_S)){
-                        InpValue = 7;
+                    else {
+                        if (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X) >= 0.5f){
+                            InpValue = 2;
+                        }
+                        if (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_X) <= -0.5f){
+                            InpValue = 4;
+                        }
+
+                        if (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) >= 0.5f){
+                            InpValue = 3;
+                        }
+                        if (GetGamepadAxisMovement(0, GAMEPAD_AXIS_LEFT_Y) <= -0.5f){
+                            InpValue = 1;
+                        }
+
+                        if (IsGamepadButtonDown(0 , GAMEPAD_BUTTON_LEFT_FACE_UP)){
+                            InpValue = 1;
+                        }
+                        if (IsGamepadButtonDown(0 , GAMEPAD_BUTTON_LEFT_FACE_DOWN)){
+                            InpValue = 3;
+                        }
+                        if (IsGamepadButtonDown(0 , GAMEPAD_BUTTON_LEFT_FACE_RIGHT)){
+                            InpValue = 2;
+                        }
+                        if (IsGamepadButtonDown(0 , GAMEPAD_BUTTON_LEFT_FACE_LEFT)){
+                            InpValue = 4;
+                        }
+
+                        if (IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_DOWN)){
+                            InpValue = 6;
+                        }
+                        if (IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_LEFT)){
+                            InpValue = 7;
+                        }
+
+                        if (IsGamepadButtonDown(0, GAMEPAD_BUTTON_RIGHT_FACE_RIGHT)){
+                            InpValue = 5;
+                        }
                     }
                     
                     StoreIntToMemory(SplitValue(Instruction, 1 ) , InpValue);
                 }
 
                 if (SplitValue(Instruction, 0 ) == "drawspr"){   
+                    FoundInstruction = true;
                     int X = 0;
                     int Y = 0;
                     int Scale = 0;
@@ -824,7 +1247,6 @@ auto CycleInstruction(){
                     }
                 }
             }
-            
 
         }
     }

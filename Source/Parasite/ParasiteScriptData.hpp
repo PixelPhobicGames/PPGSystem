@@ -81,6 +81,7 @@ typedef struct ParasiteScriptData{
    bool NotEqualFlag;
    bool ContinueFlag;
    bool ElseFlag;
+   bool ErrorFlag;
 
    int ReturnLine;
    int TextSize;

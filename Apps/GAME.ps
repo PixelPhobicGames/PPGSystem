@@ -1,21 +1,23 @@
-
-// Game to Test New Logical Instructions
-
-// Enjoy :)
-
 spr Background '888888888888888888988988889888589888888888889988888898888888888888888888858898885588888588888888888888998889888888898888888888888988888888898888888888888988888898888885888888888888985889888888858888888888888588888988888888888889888888888988899888888888888888888888888889888888888888888888888888988889888888988888888888888988+'
 
 spr PlayerSprite '++++22+++2+2112+++21112++31121132231113+2223332+22222222+3222223'
 spr PlayerBack '+++222+++++222+2+222222++22222222222222+2222222+22222222+3222223'
+spr Bullet '++5555+++522225+52233225523003255230032552233225+522225+++5555++'
 
-var PlayerX 0
-var PlayerY 0
+var PlayerX 50
+var PlayerY 50
 var Input 0
 var Direction 0
 var Velocity 0
 
 var Temp1 0
 var Temp2 0
+
+var BulletX 0
+var BulletY 0
+var BulletDirection 0 
+var BulletTrigger 0
+
 
 pspeed 100
 
@@ -35,24 +37,28 @@ pspeed 100
 
     jumpl UpdateInputs
     jumpl SetBounds
+
+    jumpl UpdateBullet
+
+    vrefresh
     
     jumpl Main
 
 :SetBounds
     if PlayerY < 0
-        set PlayerY 0
+        PlayerY = 0
     end
 
     if PlayerY > 192
-        set PlayerY 192
+        PlayerY = 192
     end
 
     if PlayerX < 0
-        set PlayerX 0
+        PlayerX = 0
     end
 
     if PlayerX > 272
-        set PlayerX 272
+        PlayerX = 272
     end
 
     ret
@@ -61,50 +67,101 @@ pspeed 100
 :UpdateInputs
 
     if Input == 2
-        add Velocity 1
-        set Direction 2
+        Velocity += 3
+        Direction = 2
     end
 
     if Input == 4
-        add Velocity 1
-        set Direction 4
+        Velocity += 3
+        Direction = 4
     end
 
     if Input == 1
-        add Velocity 1
-        set Direction 1
+        Velocity += 3
+        Direction = 1
     end
 
     if Input == 3
-        add Velocity 1
-        set Direction 3
+        Velocity += 3
+        Direction = 3
     end
 
     if Input == 0
-        sub Velocity 1
+        if Velocity != 0
+            Velocity -= 1
+        end
+        if Velocity < 0
+            Velocity = 0
+        end
     end
 
     if Velocity >= 30
-        set Velocity 30
+        Velocity = 30
     end
 
-    set Temp1 Velocity 
-    div Temp1 10
+    Temp1 = Velocity 
+    Temp1 /= 10
 
     if Direction == 2
-        add PlayerX Temp1
+        PlayerX += Temp1
     end
 
     if Direction == 4
-        sub PlayerX Temp1
+        PlayerX -= Temp1
     end
 
     if Direction == 1
-        sub PlayerY Temp1
+        PlayerY -= Temp1
     end
 
     if Direction == 3
-        add PlayerY Temp1
+        PlayerY += Temp1
+    end
+
+    if Input == 7
+        if BulletTrigger == 0
+            BulletTrigger = 1
+            BulletDirection = Direction
+            BulletX = PlayerX
+            BulletY = PlayerY
+        end
     end
     
+    ret
+
+:UpdateBullet
+    if BulletTrigger == 1
+        drawspr Bullet BulletX BulletY 4 8
+
+        if BulletDirection == 2
+            BulletX += 6
+        end
+        if BulletDirection == 4
+            BulletX -= 6
+        end
+        if BulletDirection == 1
+            BulletY -= 6
+        end
+        if BulletDirection == 3
+            BulletY += 6
+        end
+
+        if BulletX > 320
+            BulletTrigger = 0
+        end
+
+        if BulletX < 0
+            BulletTrigger = 0
+        end
+
+        if BulletY > 240
+            BulletTrigger = 0
+        end
+
+        if BulletY < 0
+            BulletTrigger = 0
+        end
+        
+    end
+
     ret
