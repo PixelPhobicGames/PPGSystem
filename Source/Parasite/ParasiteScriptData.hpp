@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-
+#include <vector>
 #include <fstream>
 #include <raylib.h>
 #include <stdlib.h>
@@ -18,6 +18,7 @@ using namespace std;
 #define MaxArrays 100
 
 static int VaribleCounter = 0;
+static int LocalVaribleCounter = 0;
 
 static int JumpPointCounter = 0;
 
@@ -45,6 +46,8 @@ typedef struct Memory{
 
 
 static Memory VaribleMemory[MaxVaribles];
+
+static Memory LocalVaribleMemory[MaxVaribles];
 
 typedef struct ArrMemory{
     string Name;

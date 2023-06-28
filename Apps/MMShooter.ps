@@ -1,0 +1,63 @@
+
+spr PlayerSprite '++++++++++++++++++++++++++++++++++++++++++++++++++223++++++++++++++++++++333++++++++++++++++++++22++++++++++++++++000000000++++++++++++0111111111000++++++++01100000001+++00++++++010001111111++++0++++201002222000000+++0++++01100111111111111100+++01100000001111000++++++0111111111000+++++++++2000000000+++++++++223322222+++++++++++++++233333+++++++++++++++++2222++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+spr RocketSmoke '++++++++++5+++++55555555+++++++++5551+11++++++++51111++1++++15++'
+
+var PlayerX 0
+var PlayerY 0
+var PlayerDirection 0
+
+var Velocity 0
+
+var Input 0
+
+pspeed 300
+
+:GameLoop
+
+    clear 
+
+    drawspr PlayerSprite PlayerX PlayerY 4 22
+
+    vrefresh
+
+    jumpl UpdateInputs
+
+    jumpl GameLoop
+
+
+:UpdateInputs
+    pullinp Input
+
+    if Input != 0
+        Velocity += 1
+        PlayerDirection = Input
+
+        drawspr RocketSmoke PlayerX - 50 PlayerY 4 22
+
+    end
+    else 
+        if Velocity != 0
+            Velocity -= 1
+        end
+    end
+
+    if PlayerDirection == 2
+        PlayerX += Velocity / 10
+    end
+    if PlayerDirection == 4
+        PlayerX -= Velocity / 10
+    end
+    if PlayerDirection == 1
+        PlayerY -= Velocity / 10
+    end    
+    if PlayerDirection == 3
+        PlayerY += Velocity / 10
+    end
+
+    if Velocity > 30
+        Velocity = 30
+    end
+
+    
+
+    ret

@@ -235,7 +235,7 @@ void DisplayTerminal(){
     if (IsKeyPressed(KEY_BACKSPACE))PPGSystem.TerminalData.erase(PPGSystem.TerminalData.size() - 1);
 
     if (GetKeyPressed() != NULL){
-        PlaySoundMulti(PPGSystem.TypingNoise);
+        PlaySound(PPGSystem.TypingNoise);
     }
 
     bool RunCommand = false;
